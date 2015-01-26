@@ -14,7 +14,7 @@ CHIP DMux {
     OUT a, b;
 
     PARTS:
-    And (a = in, b = sel, out = AandSEL);
-    Or (a = false, b = AandSEL, out = b);
-    Xor (a = AandSEL, b = in, out = a);
+    And (a = in, b = sel, out = aANDsel);
+    Or (a = false, b = aANDsel, out = b);
+    Xor (a = aANDsel, b = in, out = a);
 }
