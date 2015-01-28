@@ -15,6 +15,6 @@ CHIP DMux {
 
     PARTS:
     And (a = in, b = sel, out = aANDsel);
-    Or (a = false, b = aANDsel, out = b);
+    Or (a = false, b = aANDsel, out = b); // Assignment
     Xor (a = aANDsel, b = in, out = a);
 }
