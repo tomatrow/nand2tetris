@@ -42,5 +42,34 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+    // The letters prefixing the variable match the possible gates passed through. 
+    // The most recent gates are on the left, like polish notation. 
+    // Insignificant variables are abbreviated. 
+    // Bus slices are indicated by a postfixed m..n.
+
+    Mux16 (a = x, b = false, sel = zx, out = ZeroX);
+
+    Not16 (in = ZeroX, out = NZx);
+    Mux16 (a = ZeroX, b = NZx, sel = nx, out = NotZeroX);
+
+    Mux16 (a = y, b = false, sel = zy, out = ZeroY);
+
+    Not16 (in = ZeroY, out = NZy);
+    Mux16 (a = ZeroY, b = NZy, sel = ny, out = NotZeroY);
+
+    Add16 (a = NotZeroX, b = NotZeroY, out = AddNZXY);
+    And16 (a = NotZeroX, b = NotZeroY, out = AndNZXY);
+    Mux16 (a = AndNZXY, b = AddNZXY, sel = f, out = FunctionNotZeroXY);
+
+    Not16(in = FunctionNotZeroXY, out = NoFNZXY);
+    Mux16 (a = FunctionNotZeroXY, b = NoFNZXY, sel = no, out[0..7] = NoFNZXY0to7, out[8..14] = NoFNZXY8to14, out[15] = NoFNZXY15);
+
+    And16 (a[0..7] = NoFNZXY0to7, a[8..14] = NoFNZXY8to14, a[15] = NoFNZXY15, b[0..7] = NoFNZXY0to7, b[8..14] = NoFNZXY8to14, b[15] = NoFNZXY15, out = out);
+    
+    Or8Way (in[0..7] = NoFNZXY0to7, out = OrNoFNZxy0to7);
+    Or8Way (in[0..6] = NoFNZXY8to14, in[7] = NoFNZXY15, out = OrNoFNZxy8to15);
+    Or (a = OrNoFNZxy0to7, b = OrNoFNZxy8to15, out = OrNoFNZxy0to15);
+    Not (in = OrNoFNZxy0to15, out = zr);
+
+    And (a = NoFNZXY15, b = true, out = ng);
 }
