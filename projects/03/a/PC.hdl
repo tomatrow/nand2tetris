@@ -16,7 +16,6 @@ CHIP PC {
     OUT out[16];
 
     PARTS:
-
     Inc16 (in = lastOut, out = lastOutPlusOne);
 
     Mux16 (sel = inc, a = lastOut, b = lastOutPlusOne, out = incOut);
@@ -25,14 +24,3 @@ CHIP PC {
     
     Register (in = resetOut, load = true, out = lastOut, out = out);
 }
-
-
-
-/*
-    lastOut = Register
-    tempOut = (inc)?(lastOut++):(lastOut)
-    tempOut = (load)?(in):(tempOut)
-    tempOut = (reset)?(false):(tempOut)
-    Register = tempOut
-    out = Register
-*/
