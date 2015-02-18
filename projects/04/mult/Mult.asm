@@ -7,3 +7,24 @@
 // (R0, R1, R2 refer to RAM[0], RAM[1], and RAM[2], respectively.)
 
 // Put your code here.
+
+@0
+D = A
+@R2
+M = D // Initalize the output 
+
+(LOOP)
+    // R2 += R1
+    @R1
+    D = M
+    @R2
+    M = M + D 
+
+    // R0--
+    @R0
+    M = M - 1
+
+    // if R0 > 0 then GOTO LOOP
+    D = M
+    @LOOP 
+    D;JGT
