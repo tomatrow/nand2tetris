@@ -27,5 +27,23 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
-}
+    // Mark: - input 
+    DMux (  in = load, sel = address[14], a = memoryLoadA, b = memoryLoadB );
+
+    RAM16K ( in = in, load = memoryLoadA, address[0..13] = address[0..13], out = ramOut );
+
+    Screen ( in = in, load = memoryLoadB, address = address[0..12], out = screenOut );
+
+    // Mark: - output 
+
+    // Account for all addresses past Keyboard by making sure address[0..12] == 0x6000
+    Or8Way ( in[0..7] = address[0..7], out = addressOr7to14 );
+    Or8Way ( in[0..4] = address[8..12], in[5..7] = false, out = addressOr2to6 );
+    Or ( a = addressOr2to6, b = addressOr7to14, out = addressOr2to14 );
+
+    Keyboard ( out = keyboardOut );
+    // (address == 0x6000) ? (keyboard output) : (0)
+    Mux4Way16 ( a = keyboardOut, sel[1] = addressOr2to14, out = keyboardDataOrFalse ); 
+
+    Mux4Way16 ( a = ramOut, b = ramOut, c = screenOut, d = keyboardDataOrFalse , sel = address[13..14], out = out );
+}   

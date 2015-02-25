@@ -39,5 +39,40 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    // Control Logic 01
+    Mux16 ( a = instruction, b = aluOut, sel = instruction[15], out = instructionOrArithmeticLogicUnitOut);
+
+    // Control Logic 02
+    Not ( in = instruction[15], out = notInstruction15 );
+    Or ( a = notInstruction15, b = instruction[5], out = aRegLoad );
+    ARegister ( in = instructionOrArithmeticLogicUnitOut, load = aRegLoad, out = aRegOut, out[0..14] = addressM );
+
+    // Control Logic 03
+    Mux16 ( a = aRegOut, b = inM, sel = instruction[12], out = aRegOutOrInMemory );
+
+    // Control Logic 04 
+    And ( a = instruction[15], b = instruction[4], out = dRegLoad );
+    DRegister ( in = aluOut, load = dRegLoad, out = dRegOut );
+
+    // Control Logic 05 
+    ALU ( x = dRegOut, y = aRegOutOrInMemory, zx = instruction[11], nx = instruction[10], zy = instruction[9], ny = instruction[8], f = instruction[7], no = instruction[6], out = aluOut , out = outM, zr = aluOutIsZero, ng = aluOutIsNegative );
+
+    // Control Logic 06 
+    Not ( in = aluOutIsNegative, out = aluOutIsNotNegative );
+    Not ( in = aluOutIsZero, out = aluOutIsNotZero );
+    And ( a = aluOutIsNotNegative, b = aluOutIsNotZero, out = aluOutIsPositive );
+
+    And ( a = instruction[2], b = aluOutIsNegative, out = negativeJumpSatified );
+    And ( a = instruction[1], b = aluOutIsZero, out = zeroJumpSatified );
+    And ( a = instruction[0], b = aluOutIsPositive, out = positiveJumpSatified ); 
+
+    Or8Way ( in[0] = negativeJumpSatified, in[1] = zeroJumpSatified, in[2] = positiveJumpSatified, out = jumpSatified );
+
+    And ( a = jumpSatified, b = instruction[15], out = programCounterLoad );
+    Not ( in = programCounterLoad, out = notProgramCounterLoad );
+
+    PC ( in = aRegOut, load = programCounterLoad, inc = notProgramCounterLoad, reset = reset, out[0..14] = pc);
+
+    // Control Logic 07
+    And ( a = instruction[3], b = instruction[15], out = writeM );
 }
