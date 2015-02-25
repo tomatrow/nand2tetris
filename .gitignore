@@ -1,2 +1,3 @@
 /projects/*.out
 *.hack
+/tools/bin/*.dat
