@@ -6,25 +6,25 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.Arrays;
 
 public class Parser {
     private static String commentSpaceRegex = "//.*";
     private static String whiteSpaceRegex = "\\s*";
     private static String cleanRegex = String.format("%s|%s", commentSpaceRegex, whiteSpaceRegex);
 
-    // @(([A-Za-z_.$:]{1}[A-Za-z0-9_.$:]*)|(\d+))
     private static String addressRegex = "@((?<symbol>[A-Za-z_.$:]{1}[A-Za-z0-9_.$:]*)|(?<number>\\d+))";
     private static Pattern addressPattern = Pattern.compile(addressRegex);
-    // ((?<notLeft>!)?([?<left>AMD])(?<op>[\+\-\&|]))?(<notRight>!)?(?<right>[AMD01]);J(?<jump>GT|EQ|GE|LT|NE|LE|MO|MP)
-    private static String jumpComputationRegex = "((?<notLeft>!)?(?<left>[AMD])(?<op>[\\+\\-\\&|]))?(?<notRight>!)?(?<right>[AMD01]);J(?<jump>GT|EQ|GE|LT|NE|LE|MO|MP)";
+    private static String jumpComputationRegex = "(?<comp>(D[+\\-&|][AM])|([AM]-D)|([DAM][\\+-]1)|((!|-)?[DAM])|(-?)1|(0))(;J(?<jump>GT|EQ|GE|LT|NE|LE|MP))";
     private static Pattern jumpComputationPattern = Pattern.compile(jumpComputationRegex); 
-    // (?<dest>[AMD]){1,3}=((?<notLeft>!)?(?<left>[AMD])(?<op>[\+\-\&|]))?(<notRight>!)?(?<right>[AMD01])
-    private static String destComputationRegex = "(?<dest>[AMD]){1,3}=((?<notLeft>!)?(?<left>[AMD])(?<op>[\\+\\-\\&|]))?(?<notRight>!)?(?<right>[AMD01])";
+    private static String destComputationRegex = "((?<dest>[DAM]{1,3})=)(?<comp>(D[+\\-&|][AM])|([AM]-D)|([DAM][\\+-]1)|((!|-)?[DAM])|(-?)1|(0))";
     private static Pattern destComputationPattern = Pattern.compile(destComputationRegex); 
 
     // A user-defined symbol can be any sequence of letters, digits, underscore (_), dot (.), dollar sign ($), and colon (:) that does not begin with a digit.
     // \([A-Za-z_.$:]{1}[A-Za-z0-9_.$:]*\)
     private static String labelRegex = "\\([A-Za-z_.$:]{1}[A-Za-z0-9_.$:]*\\)";    
+    private static String symbolicAddressRegex = "@[A-Za-z_.$:]{1}[A-Za-z0-9_.$:]*";
+    // private static Pattern symbolicAddressPattern = Pattern.compile(symbolicAddressRegex);
 
     private ArrayList<String> originalAssemblyLines;
     private ArrayList<String> cleanedAssemblyLines;
@@ -33,14 +33,15 @@ public class Parser {
 
     public Parser(ArrayList<String> assemblyLines) {
         this.originalAssemblyLines = assemblyLines;
-        this.table = SymbolTable.getSharedSymbolTable();
+        this.table = new SymbolTable();
         this.cleanedAssemblyLines = null;
         this.instructions = null;
     }
 
-    public void parse() throws ParseException {
+    public void parse() throws Exception {
         // First pass
         cleanedAssemblyLines = getCleanInput(originalAssemblyLines);
+
         // Second pass
         instructions = getInstructionsFromCleanAssemblyLines(cleanedAssemblyLines);
     }
@@ -56,14 +57,25 @@ public class Parser {
             String cleanedLine = iterator.next().replaceAll(cleanRegex, ""); 
             if (cleanedLine.length() == 0) { // blank line 
                 iterator.remove();
-            } else if (cleanedLine.matches(labelRegex)) { // is label 
+            } else if (cleanedLine.startsWith("(")) { // is label 
                 // Get rid of () around the symbol
                 String symbol = cleanedLine.substring(1, cleanedLine.length()-1);
                 int address = iterator.nextIndex() - 1; // The address is from 0..n, so we subtract one. 
+                if (!table.contains(symbol)) {
+                    table.addLabel(symbol, address); // works even if the next line is a comment. 
+                } 
+                // else { // Doesn't work, we might need seperate maps for labels and @label
+                //     throw new RuntimeException("Label already defined: " + symbol);
+                // }
 
-                table.add(symbol, address); // works even if the next line is a comment. 
                 iterator.remove();
             } else { // A line that's not a label, comment, or whitespace. 
+                if (Pattern.matches(symbolicAddressRegex, cleanedLine)) { // Like @mySymbol
+                    String possibleSymbol = cleanedLine.substring(1);
+                    if (!table.contains(possibleSymbol)) {
+                        table.addAddressSymbol(possibleSymbol);
+                    }
+                }
                 iterator.set(cleanedLine);
             }
         }
@@ -72,78 +84,83 @@ public class Parser {
     }
 
     // get instructions from cleaned input 
-    private ArrayList<Instruction> getInstructionsFromCleanAssemblyLines(final ArrayList<String> assemblyLines) throws ParseException {
+    private ArrayList<Instruction> getInstructionsFromCleanAssemblyLines(final ArrayList<String> assemblyLines) throws Exception {
         ArrayList<Instruction> instructions = new ArrayList<Instruction>(assemblyLines.size());
         ListIterator<String> iterator = assemblyLines.listIterator();
 
         while (iterator.hasNext()) {  
             String assemblyLine = iterator.next();
 
-            try {
+            // try {
                 if (assemblyLine.startsWith("@")) { // A instruction 
                     instructions.add(parseAddressInstruction(assemblyLine));
                 } else { // C instruction 
                     instructions.add(parseComputationInstruction(assemblyLine));
                 }
-            } catch(Exception e) {
-                throw new ParseException(e.getMessage(), iterator.nextIndex());
-            }
+            // } catch(Exception e) {
+            //     System.out.println(assemblyLine );
+            //     throw new ParseException(e.getMessage(), iterator.nextIndex());
+            // }
         }
 
         return instructions;
     }
 
-    private AddressInstruction parseAddressInstruction(String assemblyLine) throws Exception {
+    private AddressInstruction parseAddressInstruction(String assemblyLine) throws Exception, NumberFormatException {
         Matcher matcher = addressPattern.matcher(assemblyLine);
-        int address;
-
+        Integer address;
+        // System.out.println(assemblyLine);
         if (matcher.find()) {
             String symbol = matcher.group("symbol");
             String number = matcher.group("number");
-
+            
             if (number != null) {
                 address = new Integer(number);
             } else if (symbol != null) {
-                address = table.addressForSymbol(symbol);
+                if (table.contains(symbol)) {
+                    address = table.addressForSymbol(symbol);
+                } else {
+                    throw new Exception("Table does not have: " + symbol);    
+                }
             } else {
-                throw new Exception(assemblyLine);
+                throw new Exception("A:No group found " + assemblyLine);
             }
         } else {
-            throw new Exception(assemblyLine);
+            throw new Exception("A:No Match " + assemblyLine);
         }
 
         return new AddressInstruction(address);
     }
-    private ComputationInstruction parseComputationInstruction(String assemblyLine) throws Exception {
-        if (assemblyLine.contains(";")) { // jump
-            return parseJumpComputationInstruction(assemblyLine);
-        } else if (assemblyLine.contains("=")) { // dest
-            return parseDestComputationInstruction(assemblyLine);
-        } else {
-            throw new Exception(assemblyLine);
-        }
-    }
-    private ComputationInstruction parseJumpComputationInstruction(String assemblyLine) throws Exception {
-        Matcher matcher = jumpComputationPattern.matcher(assemblyLine);
-        Map<String,String> map = new HashMap<String,String>();
-        if (matcher.find()) {
-            for (String key : ComputationInstruction.jumpKeys) {
-                map.put(key, matcher.group(key));
-            }
-        }
-        return new ComputationInstruction(map);
-    }
-    private ComputationInstruction parseDestComputationInstruction(String assemblyLine) throws Exception {
-        Matcher matcher = destComputationPattern.matcher(assemblyLine);
-        Map<String,String> map = new HashMap<String,String>();
-        if (matcher.find()) {
-            for (String key : ComputationInstruction.destKeys) {
-                map.put(key, matcher.group(key));
-            }
-        }
-        return new ComputationInstruction(map);
-    }
 
+    private ComputationInstruction parseComputationInstruction(String assemblyLine) throws Exception {
+        Map<String,String> map = new HashMap<String,String>();
+        Matcher matcher;
+        String[] keys;
+        
+        if (assemblyLine.contains(";")) { // jump
+            matcher = jumpComputationPattern.matcher(assemblyLine);
+            keys = ComputationInstruction.jumpKeys;
+        } else if (assemblyLine.contains("=")) { // dest
+            matcher = destComputationPattern.matcher(assemblyLine);
+            keys = ComputationInstruction.destKeys;
+        } else {
+            throw new Exception("Does not have ;|=: \"" + assemblyLine + "\"");
+        }
+
+
+        if (matcher.find()) {
+            for (String key : keys) {
+                map.put(key, matcher.group(key));
+            }
+        } else {
+            System.out.println(matcher);
+            System.out.println(Arrays.toString(keys));
+            throw new Exception("C:No match " + "\"" + assemblyLine + "\"");
+        }
+
+        return new ComputationInstruction(map);
+    }
+   
     // Accessors 
     public ArrayList<String> getOriginalAssemblyLines() {
         return new ArrayList<String>(Collections.unmodifiableList(originalAssemblyLines));

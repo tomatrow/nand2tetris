@@ -1,3 +1,4 @@
 /projects/*.out
 *.hack
 *.dat
+*.class

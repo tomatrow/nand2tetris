@@ -4,19 +4,51 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.text.ParseException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ListIterator;
+import java.io.IOException;
+import java.nio.file.Path;
 
 public class Driver {
-    // Don't forget to remove the exception throwing. 
-    public static void main(String[] args) throws Exception { // Seriously 
-        ArrayList<String> list = new ArrayList<String>(Files.readAllLines(Paths.get(args[0]), Charset.forName("US-ASCII")));
-        Parser parser = new Parser(list);
+    public static Charset characterSet = Charset.forName("US-ASCII");
 
-        parser.parse();
+    public static void main(String[] args) { 
+        try {
+            // need a pathname
+            if (args.length == 0) {
+                throw new IllegalArgumentException("No assembly path to read.");
+            }
 
-        for (Instruction instruction : parser.getInstructions()) {
-            System.out.println(instruction);
+            // paths 
+            String pathName = args[0];
+            Path readPath = Paths.get(pathName);
+            if (!readPath.toString().endsWith(".asm")) {
+                throw new IOException("Not an assembly file: " + "\"" + readPath + "\"");
+            }
+            // replace asm with hack 
+            Path writePath = Paths.get(readPath.toString().substring(0,readPath.toString().length()-3) + "hack");
+
+            // reading 
+            ArrayList<String> readlines = new ArrayList<String>(Files.readAllLines(readPath, characterSet));
+
+            // parsing 
+            Parser parser = new Parser(readlines);
+            parser.parse();
+
+            ArrayList<Instruction> instructions = parser.getInstructions();
+
+            // writing 
+            ArrayList<String> writeLines = new ArrayList<String>(instructions.size());
+            for (Instruction instruction : instructions) {
+                writeLines.add(instruction.getBinaryString());
+            }
+
+            Files.write(writePath, writeLines, characterSet);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        // System.out.println(parser.getSymbolTable().getLabels());
     }
+
 }
