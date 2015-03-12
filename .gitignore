@@ -1,4 +1,7 @@
 /projects/*.out
 *.hack
 *.dat
+<<<<<<< HEAD
 *.class
+=======
+>>>>>>> project06
