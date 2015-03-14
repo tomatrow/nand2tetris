@@ -2,13 +2,12 @@ package edu.miracosta.cs220.project07and08;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.nio.file.Path;
 import java.io.IOException;
+import java.nio.file.StandardOpenOption;
 
 public class Driver {
-    public static Charset characterSet = Charset.forName("US-ASCII");
 
     public static void main(String[] args) throws Exception {
         // need a pathname
@@ -24,18 +23,24 @@ public class Driver {
         }
 
         // reading 
-        ArrayList<String> readlines = new ArrayList<String>(Files.readAllLines(readPath, characterSet));
+        ArrayList<String> readlines = new ArrayList<String>(Files.readAllLines(readPath));
 
         // parsing 
         Parser parser = new Parser(readlines);
         parser.parse();
 
-        // Testing 
-        // testParser(parser);
+        // encoding 
         Encoder encoder = new Encoder(parser.getTokenLines(), readPath.toString().split("\\.")[0]);
         encoder.encode();
 
-        System.out.println(encoder.getAssemblyProgram());
+        // writing 
+        String pathNameWithoutExtention = readPath.toString().split("\\.vm")[0];
+        Path writePath = Paths.get(pathNameWithoutExtention + ".asm");
+
+        // System.out.println(writePath);
+        Files.write(writePath, new ArrayList<String>(){{
+            add(encoder.getAssemblyProgram());
+        }}, StandardOpenOption.WRITE);
     }
 
     public static void testParser(Parser parser) {
