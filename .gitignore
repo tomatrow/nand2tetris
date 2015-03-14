@@ -1,7 +1,5 @@
 /projects/*.out
 *.hack
 *.dat
-<<<<<<< HEAD
 *.class
-=======
->>>>>>> project06
+/projects/07/*.asm
