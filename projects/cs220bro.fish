@@ -16,10 +16,9 @@ function cs220bro -d "CS220 Build and Run, bro." -a option projectName
 
     if test $option = "build"
         echo building...
-        # only changed files | only java files | trimmed of "projects/src/" 
+        # only changed files | only java files | trimmed of "projects/" 
         set files (git diff --name-only | grep -e '.*'$projectName/'.*\.java' | sed "s/^projects\///")
 
-        # echo (basename (pwd))/$sourceDirectory
         set classPath $classPath:./$sourceDirectory
 
         for javaFile in $files 
