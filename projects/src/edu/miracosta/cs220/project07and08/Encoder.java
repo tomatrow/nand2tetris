@@ -86,7 +86,7 @@ public class Encoder {
             case CONSTANT:
                 assemblyProgram.append(Translator.pushConstant(index));
             default:
-                throw new RuntimeException("Unimplemented");
+                throw new RuntimeException("Unimplemented segment: " + segment.toString());
         }
 
     }

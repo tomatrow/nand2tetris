@@ -165,7 +165,7 @@ public enum Command {
             case LT:
                 return "JLT";
             default: 
-                throw new RuntimeException();
+                throw new RuntimeException("Invalid operator " + "\"" + this.toString() + "\"");
         }
     }
 }

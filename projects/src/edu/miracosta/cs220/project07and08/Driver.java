@@ -13,7 +13,7 @@ public class Driver {
     public static void main(String[] args) throws Exception {
         // need a pathname
         if (args.length == 0) {
-            throw new IllegalArgumentException("No assembly path to read.");
+            throw new IllegalArgumentException("No Virtual Machine path to read.");
         }
 
         // paths 
