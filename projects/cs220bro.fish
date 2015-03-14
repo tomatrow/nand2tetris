@@ -1,8 +1,8 @@
 #! /usr/local/bin/fish
 
-set buildDirectory bin
+set buildDirectory "bin"
 set mainClassName "Driver"
-set sourceDirectory src
+set sourceDirectory "src"
 set classPath "./lib/*" # all the .jars 
 
 function cs220bro -d "CS220 Build and Run, bro." -a option projectName
@@ -21,7 +21,7 @@ function cs220bro -d "CS220 Build and Run, bro." -a option projectName
         set classPath $classPath:./$sourceDirectory
 
         for javaFile in $files 
-            javac -d $buildDirectory -cp $classPath $javaFile
+            javac -verbose -d $buildDirectory -cp $classPath $javaFile 
         end 
     end
     
