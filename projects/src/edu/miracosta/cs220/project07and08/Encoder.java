@@ -37,62 +37,19 @@ public class Encoder {
         for (int i = 0;i < tokens.size();i++) {
             Triple<Command, Object, Integer> token = tokens.get(i);
             String assemblyString;
+            Command command = token.x;
 
-            switch (token.x) {
-                case ADD:
-                    assemblyString = Translator.add();
-                    break;
-                case SUB:
-                    assemblyString = Translator.sub();
-                    break;
-                case OR:
-                    assemblyString = Translator.or();
-                    break;
-                case AND:
-                    assemblyString = Translator.and();
-                    break;
-                case NOT:
-                    assemblyString = Translator.not();
-                    break;
-                case NEG:
-                    assemblyString = Translator.neg();
-                    break;
-                case EQ:
-                    assemblyString = Translator.eq();
-                    break;
-                case LT:
-                    assemblyString = Translator.lt();
-                    break;
-                case GT:
-                    assemblyString = Translator.gt();
-                    break;
-                case PUSH:
-                    assemblyString = Translator.pushConstant(token.z);
-                    break;
-                default: 
-                    throw new RuntimeException("Not implemented");
+            if (command.isArithmeticOperation()) {
+                assemblyString = Translator.arithmeticCommand(command);
+            } else if (command.isMemoryCommand()) {
+                Segment segment = (Segment) token.y;
+                assemblyString = Translator.memoryCommand(command, segment, token.z);
+            } else {
+                throw new RuntimeException("Unimplemented Command: " + command);
             }
 
             assemblyProgram.append(assemblyString);
         }
-    }
-    
-    private void push(Segment segment, Integer index) {
-        if (segment == null || index == null) {
-            throw new IllegalArgumentException();
-        }
-
-        switch (segment) {
-            case CONSTANT:
-                assemblyProgram.append(Translator.pushConstant(index));
-            default:
-                throw new RuntimeException("Unimplemented segment: " + segment.toString());
-        }
-
-    }
-    
-    private void pop(Segment segment, Integer index) {
-
     }
 
     public String getAssemblyProgram() {

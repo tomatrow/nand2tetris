@@ -83,6 +83,33 @@ public enum Command {
         }
     }
 
+    public boolean isArithmeticOperation() {
+        switch (this) {
+            case AND:
+            case OR:
+            case NOT:
+            case ADD:
+            case SUB:
+            case NEG:
+            case EQ:
+            case GT:
+            case LT:
+                return true;
+            default: 
+                return false; 
+        }
+    }    
+    
+    public boolean isMemoryCommand() {
+        switch (this) {
+            case PUSH:
+            case POP:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public boolean isUnaryStackOperation() {
         switch (this) {
             case NOT:
