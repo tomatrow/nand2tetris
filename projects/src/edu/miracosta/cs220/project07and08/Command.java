@@ -99,7 +99,18 @@ public enum Command {
                 return false; 
         }
     }    
-    
+
+    public boolean isJumpCommand() {
+        switch (this) {
+            case EQ:
+            case GT:
+            case LT:
+                return true;
+            default: 
+                return false; 
+        }
+    }
+
     public boolean isMemoryCommand() {
         switch (this) {
             case PUSH:

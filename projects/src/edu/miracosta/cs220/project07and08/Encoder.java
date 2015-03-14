@@ -5,14 +5,14 @@ import java.util.Collections;
 
 public class Encoder {
 
-    private String fileName;
+    private Translator translator;
     private ArrayList<Triple<Command, Object, Integer>> tokens;
-    private StringBuilder assemblyProgram;
+    private StringBuilder assembly;
 
-    public Encoder(ArrayList<Triple<Command, Object, Integer>> tokens, String fileName) {
+    public Encoder(Translator translator, ArrayList<Triple<Command, Object, Integer>> tokens) {
+        this.translator = translator;
         this.tokens = tokens;
-        this.fileName = fileName;
-        this.assemblyProgram = new StringBuilder();
+        this.assembly = new StringBuilder();
     }
 
     public void encode() {
@@ -36,24 +36,24 @@ public class Encoder {
     private void translate() {
         for (int i = 0;i < tokens.size();i++) {
             Triple<Command, Object, Integer> token = tokens.get(i);
-            String assemblyString;
+            String assemblyInstructions;
             Command command = token.x;
 
             if (command.isArithmeticOperation()) {
-                assemblyString = Translator.arithmeticCommand(command);
+                assemblyInstructions = translator.arithmeticCommand(command);
             } else if (command.isMemoryCommand()) {
                 Segment segment = (Segment) token.y;
-                assemblyString = Translator.memoryCommand(command, segment, token.z);
+                assemblyInstructions = translator.memoryCommand(command, segment, token.z);
             } else {
                 throw new RuntimeException("Unimplemented Command: " + command);
             }
 
-            assemblyProgram.append(assemblyString);
+            assembly.append(assemblyInstructions);
         }
     }
 
-    public String getAssemblyProgram() {
-        return assemblyProgram.toString();
+    public String getAssembly() {
+        return assembly.toString();
     }
 }
 

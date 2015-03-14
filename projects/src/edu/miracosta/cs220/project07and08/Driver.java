@@ -29,8 +29,11 @@ public class Driver {
         Parser parser = new Parser(readlines);
         parser.parse();
 
-        // encoding 
-        Encoder encoder = new Encoder(parser.getTokenLines(), readPath.toString().split("\\.")[0]);
+        // encoding
+        SymbolTable table = new SymbolTable();
+        table.setFileName(readPath.getFileName().toString().split("\\.vm")[0]);
+        Translator translator = new Translator(table);
+        Encoder encoder = new Encoder(translator, parser.getTokenLines());
         encoder.encode();
 
         // writing 
