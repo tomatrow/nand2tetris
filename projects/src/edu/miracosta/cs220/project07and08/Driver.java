@@ -5,7 +5,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.nio.file.Path;
 import java.io.IOException;
-import java.nio.file.StandardOpenOption;
+import java.nio.charset.StandardCharsets;
 
 public class Driver {
 
@@ -40,10 +40,8 @@ public class Driver {
         String pathNameWithoutExtention = readPath.toString().split("\\.vm")[0];
         Path writePath = Paths.get(pathNameWithoutExtention + ".asm");
 
-        // System.out.println(writePath);
-        Files.write(writePath, new ArrayList<String>(){{
-            add(encoder.getAssemblyProgram());
-        }}, StandardOpenOption.WRITE);
+        // Not using US_ASCII will break the CPUEmulator...which was a warning in the book.
+        Files.write(writePath, new ArrayList<String>(){{add(encoder.getAssembly());}}, StandardCharsets.US_ASCII); 
     }
 
     public static void testParser(Parser parser) {
