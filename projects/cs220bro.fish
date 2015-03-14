@@ -24,9 +24,7 @@ function cs220bro -d "CS220 Build and Run, bro." -a option projectName
         for javaFile in $files 
             javac -d $buildDirectory -cp $classPath $javaFile 
         end 
-    end
-    
-    if test $option = "run"
+    else if test $option = "run"
         echo running...
 
         set mainClassFile (find $buildDirectory | grep -e '.*'$projectName'/'$mainClassName'.class')
