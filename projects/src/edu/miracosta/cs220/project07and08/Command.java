@@ -144,10 +144,7 @@ public enum Command {
                     return true;
                 }
             case INTEGER:
-                if (object == null || !object.getClass().equals(Integer.class)) {
-                    return false;
-                }
-                return true; // TODO: Specify range 
+                return isValidInteger(object);
             case NULL:
                 return object == null;
             case SYMBOL:
@@ -161,10 +158,7 @@ public enum Command {
     public boolean validSecondArgument(Object object) {
         switch (this.secondArgument()) {
             case INTEGER:
-                if (object == null || !object.getClass().equals(Integer.class)) {
-                    return false;
-                }
-                return true; // TODO: Specify range 
+                return isValidInteger(object);
             case NULL:
                 return object == null;
             default:
@@ -194,5 +188,12 @@ public enum Command {
             default: 
                 throw new RuntimeException("Invalid operator " + "\"" + this.toString() + "\"");
         }
+    }
+
+    private boolean isValidInteger(Object object) {
+        if (object == null || !object.getClass().equals(Integer.class)) {
+            return false;
+        }
+        return true; // TODO: Specify range 
     }
 }
