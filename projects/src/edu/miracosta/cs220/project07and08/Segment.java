@@ -6,8 +6,6 @@ import java.util.Map;
 public enum Segment {
     ARGUMENT, LOCAL, STATIC, CONSTANT, THIS, THAT, POINTER, TEMP;
 
-    // public static final Segment[] all = { ARGUMENT, LOCAL, STATIC, CONSTANT, THIS, THAT, POINTER, TEMP };
-
      public static final Map<String, Segment> symbolMap = new HashMap<String, Segment>() {{
         put("argument", ARGUMENT);
         put("local", LOCAL);
@@ -18,7 +16,6 @@ public enum Segment {
         put("pointer", POINTER);
         put("temp", TEMP);
     }};
-
 
     public int baseAddress() {
         switch (this) {

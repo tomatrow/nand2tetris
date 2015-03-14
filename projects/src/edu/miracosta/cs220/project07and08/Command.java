@@ -7,15 +7,6 @@ import java.util.Map;
 public enum Command {
     PUSH, POP, AND, OR, NOT, ADD, SUB, NEG, EQ, GT, LT, LABEL, GOTO, IF, FUNCTION, RETURN, CALL; 
 
-    // public static final Command[] memory = { PUSH, POP };
-    // public static final Command[] logical = { AND, OR, NOT };
-    // public static final Command[] arithmatic = { ADD, SUB, NEG };
-    // public static final Command[] comparison = { EQ, GT, LT };
-    
-    // public static final Command[] flow = { LABEL, GOTO, IF, FUNCTION, RETURN, CALL };
-
-    // public static final Command[] all = { PUSH, POP, AND, OR, NOT, ADD, SUB, NEG, EQ, GT, LT,LABEL, GOTO, IF, FUNCTION, RETURN, CALL };
-
     public static final Map<String, Command> symbolMap = new HashMap<String, Command>() {{
         put("push", PUSH);
         put("pop", POP);

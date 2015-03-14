@@ -9,7 +9,6 @@ public class Encoder {
     private ArrayList<Triple<Command, Object, Integer>> tokens;
     private StringBuilder assemblyProgram;
 
-
     public Encoder(ArrayList<Triple<Command, Object, Integer>> tokens, String fileName) {
         this.tokens = tokens;
         this.fileName = fileName;

@@ -1,25 +1,7 @@
 package edu.miracosta.cs220.project07and08;
 
 public class Translator {
-    // public static String destMnemonics[] = {"NULL", "M", "D", "MD", "A", "AM", "AD", "AMD"};
-    // public static String compMnemonics[] = {"0", "1", "-1", "D", "A", "!D", "!A", "-D", "-A", "D+1", "A+1", "D-1", "A-1", "D+A", "A+D", "D-A", "A-D", "D&A", "A&D", "D|A", "A|D", "M", "!M", "-M", "M+1", "M-1", "D+M", "M+D", "D-M", "M-D", "D&M", "M&D", "D|M", "M|D"};
-    // public static String jumpMnemonics[] = {"NULL", "JGT", "JEQ", "JGE", "JLT", "JNE", "JLE", "JMP"};
     private static int eqCounter = 0;
-    
-    // public String pushSegmentIntoD() {
-
-    // }
-
-
-    // public static String indexAssembly(Integer index) {
-        // return "@" + index + "\n";
-    // }
-    // public static String setDtoIndex(Integer index) {
-        // return indexAssembly(index) + "D=A\n";
-    // }
-    // public static String incrementSegment(Segment segment) {
-
-    // }
 
     public static String pushConstant(Integer constant) {
         /*

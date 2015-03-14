@@ -75,7 +75,7 @@ public class Parser {
                     firstArgumentValue = parseArgument(command.firstArgument(), possibleTokens[1]);
                 }
                 if (argumentCount == 2) {
-                    // Will be fixed in the next release. 
+                    // The second argument is always an integer
                     secondArgumentValue = (Integer) parseArgument(command.secondArgument(), possibleTokens[2]);
                 }
             } catch (Exception e) {
