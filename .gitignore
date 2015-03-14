@@ -1,5 +1,5 @@
-/projects/*.out
-*.hack
-*.dat
-*.class
-/projects/07/*.asm
+/projects/**/*.out
+/tools/**/*.dat
+/projects/**/*.hack
+/projects/**/*.class
+/projects/07/**/*.asm
