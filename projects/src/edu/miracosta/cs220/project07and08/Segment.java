@@ -16,29 +16,4 @@ public enum Segment {
         put("pointer", POINTER);
         put("temp", TEMP);
     }};
-
-    public int baseAddress() {
-        switch (this) {
-            case CONSTANT:
-                return 0;
-            default:
-                throw new RuntimeException();
-            // case ARGUMENT:
-            //     return 
-            // case LOCAL:
-            //     return 
-            // case STATIC:
-            //     return 
-            // case CONSTANT:
-            //     return 
-            // case THIS:
-            //     return 
-            // case THAT:
-            //     return 
-            // case POINTER:
-            //     return 3;
-            // case TEMP:
-            //     return 5;
-        }
-    }
 }
