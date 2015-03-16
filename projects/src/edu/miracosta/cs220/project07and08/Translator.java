@@ -20,6 +20,9 @@ public class Translator {
                         return pushConstant(index);
                     case STATIC:
                         return pushStatic(index);
+                    case TEMP:
+                    case POINTER:
+                        return setDtoRegister(segment.baseAddress() + index) + pushDontoWorkingStack();
                     default:
                         throw new RuntimeException("Unimplemented PUSH segment: " + segment);
                 }
@@ -27,6 +30,9 @@ public class Translator {
                 switch (segment) {
                     case STATIC:
                         return popStatic(index);
+                    case TEMP:
+                    case POINTER:
+                        return popWorkingStackIntoD() + setRegisterToD(segment.baseAddress() + index);
                     default:
                         throw new RuntimeException("Unimplemented POP segment: " + segment);
                 }
@@ -162,8 +168,12 @@ public class Translator {
         return String.format("@R%d\nD = M\n", register);
     }
 
-    private String setRegisterToBoolean(int regester, boolean value) {
-        return String.format("@R%d\nM = %d // M[R%d] = true\n", regester, ((value)?-1:0), regester);
+    private String setRegisterToBoolean(int register, boolean value) {
+        return String.format("@R%d\nM = %d // M[R%d] = true\n", register, ((value)?-1:0), register);
+    }
+
+    private String setRegisterToD(int register) {
+        return String.format("@R%d\nM = D\n", register);
     }
 
     /*
