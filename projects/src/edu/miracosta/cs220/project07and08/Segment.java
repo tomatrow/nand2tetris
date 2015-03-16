@@ -74,5 +74,18 @@ public enum Segment {
         }
     }
 
-
+    public String pointerSymbol() {
+        switch (this) {
+            case ARGUMENT:
+                return "ARG";
+            case LOCAL:
+                return "LCL";
+            case THIS:
+                return "THIS";
+            case THAT:
+                return "THAT";
+            default:
+                throw new IllegalStateException();
+        }
+    }
 }

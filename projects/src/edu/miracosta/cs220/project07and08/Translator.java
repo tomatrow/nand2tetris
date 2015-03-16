@@ -23,6 +23,11 @@ public class Translator {
                     case TEMP:
                     case POINTER:
                         return setDtoRegister(segment.baseAddress() + index) + pushDontoWorkingStack();
+                    case ARGUMENT:
+                    case LOCAL:
+                    case THIS:
+                    case THAT:
+                        return dereferencePointerIntoD(segment, index) + pushDontoWorkingStack();
                     default:
                         throw new RuntimeException("Unimplemented PUSH segment: " + segment);
                 }
@@ -33,6 +38,11 @@ public class Translator {
                     case TEMP:
                     case POINTER:
                         return popWorkingStackIntoD() + setRegisterToD(segment.baseAddress() + index);
+                    case ARGUMENT:
+                    case LOCAL:
+                    case THIS:
+                    case THAT:
+                        return popWorkingStackIntoD() + setReferenceToD(segment, index);
                     default:
                         throw new RuntimeException("Unimplemented POP segment: " + segment);
                 }
@@ -164,6 +174,66 @@ public class Translator {
     }
 
     // D operations 
+
+    /*
+        @R15 // A = R15
+        M = D // *R15 = originalD 
+        @pointerSymbol // A = &pointer
+        D = M // D = pointer
+        @index // A = index
+        D = D + A // D = pointer + index
+        @R14 // A = R14
+        M = D // *R14 = pointer + index 
+        @R15 // A = R15
+        D = M // D = originalD
+        @R14 // A = &(pointer + index)
+        A = M // A = pointer + index
+        M = D // *(pointer + index) = originalD
+    */
+    private String setReferenceToD(Segment segment, int index) {
+        if (!segment.isPointer()) {
+            throw new IllegalArgumentException();
+        }
+        String pointerSymbol = segment.pointerSymbol();
+
+        String formatString = "@R15 // A = R15\n" +
+                              "M = D // *R15 = originalD \n" +
+                              "@%s // A = &pointer\n" +
+                              "D = M // D = pointer\n" +
+                              "@%d // A = index\n" +
+                              "D = D + A // D = pointer + index\n" +
+                              "@R14 // A = R14\n" +
+                              "M = D // *R14 = pointer + index \n" +
+                              "@R15 // A = R15\n" +
+                              "D = M // D = originalD\n" +
+                              "@R14 // A = &(pointer + index)\n" +
+                              "A = M // A = pointer + index\n" +
+                              "M = D // *(pointer + index) = originalD\n";
+
+        return String.format(formatString, pointerSymbol, index);
+    }
+    
+    /*
+    @pointerSymbol // A = pointer
+    D = M // D = pointer
+    @index // A = index
+    A = D + A // A = pointer + index
+    D = M // D = *(pointer + index)
+    */
+    private String dereferencePointerIntoD(Segment segment, int index) {
+        if (!segment.isPointer()) {
+            throw new IllegalArgumentException();
+        }
+        String pointerSymbol = segment.pointerSymbol();
+
+        String formatString = "@%s // A = pointer\n" +
+                              "D = M // D = pointer\n" +
+                              "@%d // A = index\n" +
+                              "A = D + A // A = pointer + index\n" +
+                              "D = M // D = *(pointer + index)\n";
+
+        return String.format(formatString, pointerSymbol, index);
+    }
     private String setDtoRegister(int register) {
         return String.format("@R%d\nD = M\n", register);
     }
