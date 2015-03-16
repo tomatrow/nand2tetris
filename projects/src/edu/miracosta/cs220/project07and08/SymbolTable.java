@@ -38,4 +38,8 @@ public class SymbolTable {
 
         return label;
     }
+
+    public String labelForStaticIndex(Integer i) {
+        return getFileName() + "." + i;
+    }
 }

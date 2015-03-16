@@ -15,10 +15,21 @@ public class Translator {
 
         switch (command) { 
             case PUSH:
-                if (segment != Segment.CONSTANT) {
-                    throw new RuntimeException("Unimplemented PUSH segment: " + segment);
+                switch (segment) {
+                    case CONSTANT:
+                        return pushConstant(index);
+                    case STATIC:
+                        return pushStatic(index);
+                    default:
+                        throw new RuntimeException("Unimplemented PUSH segment: " + segment);
                 }
-                return pushConstant(index);
+            case POP:
+                switch (segment) {
+                    case STATIC:
+                        return popStatic(index);
+                    default:
+                        throw new RuntimeException("Unimplemented POP segment: " + segment);
+                }
             default:
                 throw new RuntimeException("Unimplemented Command: " + command.toString());
         }
@@ -62,9 +73,35 @@ public class Translator {
     }
 
     /*
+        popWorkingStackIntoD()
+        @fileName.i // A = fileName.i
+        M = D // *fileName.i = D
+    */
+    private String popStatic(Integer index) {
+        String staticIndexlabel = table.labelForStaticIndex(index);
+
+        return popWorkingStackIntoD() +
+               String.format("@%s // A = %s\n", staticIndexlabel, staticIndexlabel) + 
+               "M = D // *fileName.i = D\n";
+    }
+
+    /*    
+        @fileName.i // A = fileName.i
+        D = M // D = *fileName.i
+        pushDtoStack()
+    */
+    private String pushStatic(Integer index) {
+        String staticIndexlabel = table.labelForStaticIndex(index);
+
+        return String.format("@%s // A = %s\n", staticIndexlabel, staticIndexlabel) + 
+               "D = M // D = *fileName.i\n" + 
+               pushDontoWorkingStack();
+    }
+
+    /*
         setRegisterToBoolean(13, true)
         sub()
-        popStackIntoD() // D = 0 || !0
+        popWorkingStackIntoD() // D = 0 || !0
 
         |@label
         |D;OPERATOR // if D == 0 then 
@@ -74,7 +111,7 @@ public class Translator {
         |(label)
         
         setDtoRegister(13)
-        pushDontoStack()
+        pushDontoWorkingStack()
     */
     private String equalityOperation(Command command) {
         String label = table.labelForJumpCommand(command);
@@ -85,18 +122,18 @@ public class Translator {
 
         return setRegisterToBoolean(13, true) + 
                arithmeticCommand(Command.SUB) + 
-               popStackIntoD() +
+               popWorkingStackIntoD() +
                String.format(formatString, label, command.operator(), label) +
                setDtoRegister(13) +
-               pushDontoStack();
+               pushDontoWorkingStack();
     }
 
     private String binaryArithmeticOperation(Command command) {
-        return popStackIntoD()+ useBinaryArithmeticOperatorOnDandTopOfStack(command) + pushDontoStack();
+        return popWorkingStackIntoD()+ useBinaryArithmeticOperatorOnDandTopOfStack(command) + pushDontoWorkingStack();
     }
 
     private String unaryArithmeticOperation(Command command) {
-        return popStackIntoD() + useUnaryOperatorOnD(command) + pushDontoStack();
+        return popWorkingStackIntoD() + useUnaryOperatorOnD(command) + pushDontoWorkingStack();
     }
 
     /*
@@ -135,7 +172,7 @@ public class Translator {
         AM = M - 1 // SP = SP - 1; A = SP - 1
         D = M // D = *SP
     */
-    private String popStackIntoD() {  
+    private String popWorkingStackIntoD() {  
         return "// pop top into D\n@SP // A = &SP\nAM = M - 1 // SP = SP - 1; A = SP - 1\nD = M // D = *SP\n";
     }
 
@@ -147,7 +184,7 @@ public class Translator {
         @SP // A = &SP
         M = M + 1 // SP = SP + 1
     */
-    private String pushDontoStack() {
+    private String pushDontoWorkingStack() {
         return "// push D onto stack \n@SP // A = &SP\nA = M // A = SP\nM = D // *SP = D\n@SP // A = &SP\nM = M + 1 // SP = SP + 1\n";
     }
 }
