@@ -5,6 +5,7 @@ set mainClassName "Driver"
 set sourceDirectory "src"
 set classPath "./lib/*" # all the .jars 
 
+
 function cs220bro -d "CS220 Build and Run, bro." -a option projectName
     set argCount (count $argv)
     if test $argCount -gt 2
@@ -15,7 +16,7 @@ function cs220bro -d "CS220 Build and Run, bro." -a option projectName
     end
 
     if test $option = "build"
-        echo building...
+        echo "building..."
         # only changed files | only java files | trimmed of "projects/" 
         set files (git diff --name-only | grep -e '.*'$projectName/'.*\.java' | sed "s/^projects\///")
 
@@ -25,8 +26,7 @@ function cs220bro -d "CS220 Build and Run, bro." -a option projectName
             javac -d $buildDirectory -cp $classPath $javaFile 
         end 
     else if test $option = "run"
-        echo running...
-
+        echo "running..."
         set mainClassFile (find $buildDirectory | grep -e '.*'$projectName'/'$mainClassName'.class')
         set classPath $classPath:./$buildDirectory 
 
