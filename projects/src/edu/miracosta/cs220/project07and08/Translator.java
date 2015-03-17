@@ -30,7 +30,7 @@ public class Translator {
                     case LOCAL:
                     case THIS:
                     case THAT:
-                        return dereferencePointerIntoD(segment, index) + pushDontoWorkingStack();
+                        return pushVirtual(segment, index);
                 }
             case POP:
                 switch (segment) {
@@ -43,7 +43,7 @@ public class Translator {
                     case LOCAL:
                     case THIS:
                     case THAT:
-                        return popWorkingStackIntoD() + setReferenceToD(segment, index);
+                        return popVirtual(segment, index);
                     case CONSTANT:
                         throw new IllegalArgumentException("Constant segment cannot be popped.");
                 }
@@ -75,11 +75,22 @@ public class Translator {
         }
     }
 
+    private String pushStatic(Integer index) {
+        return "@" + table.labelForStaticIndex(index) + "\n" +  // A = staticIndexlabel
+               "D = M\n" +  // D = *fileName.i
+               pushDontoWorkingStack();
+    }
+
     private String pushReal(int address) {
         return "@" + address + "\n" +
                "D = M\n" + 
                pushDontoWorkingStack(); 
 
+    }
+
+    private String pushVirtual(Segment segment, int index) {
+        return dereferencePointerIntoD(segment, index) + 
+               pushDontoWorkingStack();
     }
 
     private String pushConstant(Integer constant) {
@@ -91,11 +102,11 @@ public class Translator {
                "@SP\n" + // A = &SP
                "M = M + 1\n"; // SP = SP + 1
     }
-    
-    private String pushStatic(Integer index) {
-        return "@" + table.labelForStaticIndex(index) + "\n" +  // A = staticIndexlabel
-               "D = M\n" +  // D = *fileName.i
-               pushDontoWorkingStack();
+
+    private String popStatic(int index) {
+        return popWorkingStackIntoD() +
+               "@" + table.labelForStaticIndex(index) + "\n" +  // A = staticIndexlabel
+               "M = D\n"; // *staticIndexlabel = D
     }
 
     private String popReal(int address) {
@@ -104,10 +115,9 @@ public class Translator {
                "M = D\n";
     }
 
-    private String popStatic(int index) {
-        return popWorkingStackIntoD() +
-               "@" + table.labelForStaticIndex(index) + "\n" +  // A = staticIndexlabel
-               "M = D\n"; // *staticIndexlabel = D
+    private String popVirtual(Segment segment, int index) {
+        return popWorkingStackIntoD() + 
+               setReferenceToD(segment, index);
     }
 
     private String unaryArithmeticOperation(String operator) {

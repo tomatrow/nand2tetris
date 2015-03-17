@@ -38,19 +38,19 @@ public class Encoder {
     private void translate() {
         for (int i = 0;i < tokens.size();i++) {
             Triple<Command, Object, Integer> token = tokens.get(i);
-            String assemblyInstructions;
+            String assemblySegment;
             Command command = token.x;
 
             if (command.isArithmeticOperation()) {
-                assemblyInstructions = translator.arithmeticCommand(command);
+                assemblySegment = translator.arithmeticCommand(command);
             } else if (command.isMemoryCommand()) {
                 Segment segment = (Segment) token.y;
-                assemblyInstructions = translator.memoryCommand(command, segment, token.z);
+                assemblySegment = translator.memoryCommand(command, segment, token.z);
             } else {
                 throw new RuntimeException("Unimplemented Command: " + command);
             }
 
-            assembly.append(assemblyInstructions);
+            assembly.append(assemblySegment);
         }
     }
 
