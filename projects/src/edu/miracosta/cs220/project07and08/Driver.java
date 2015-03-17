@@ -43,18 +43,4 @@ public class Driver {
         // Not using US_ASCII will break the CPUEmulator...which was a warning in the book.
         Files.write(writePath, new ArrayList<String>(){{add(encoder.getAssembly());}}, StandardCharsets.US_ASCII); 
     }
-
-    public static void testParser(Parser parser) {
-        ArrayList<String> originalLines = parser.getOriginalLines();
-        ArrayList<Pair<String, Integer>> cleanLines =  parser.getCleanedLines();
-        ArrayList<Triple<Command, Object, Integer>> tokenLines = parser.getTokenLines();
-
-        for (int x = 0;x < tokenLines.size();x++) {
-            Triple<Command, Object, Integer> tokenLine = tokenLines.get(x);
-            Pair<String, Integer> cleanLine = cleanLines.get(x);
-            String origianlLine = originalLines.get(cleanLine.y);
-
-            System.out.format("%s\n%s\n", origianlLine, tokenLine);
-        }       
-    }
 }
