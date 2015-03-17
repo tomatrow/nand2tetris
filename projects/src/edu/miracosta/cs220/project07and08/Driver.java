@@ -7,6 +7,10 @@ import java.nio.file.Path;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+/**
+    Main class. 
+    Usage: `java Driver path/to/vmfile.vm`
+*/
 public class Driver {
 
     public static void main(String[] args) throws Exception {

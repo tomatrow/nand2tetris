@@ -2,7 +2,9 @@ package edu.miracosta.cs220.project07and08;
 
 import java.util.ArrayList;
 import java.util.Collections;
-
+/**
+    Encode a series of (Command,Object,Integer) triples into an assembly program. 
+*/
 public class Encoder {
 
     private Translator translator;
@@ -56,4 +58,3 @@ public class Encoder {
         return assembly.toString();
     }
 }
-

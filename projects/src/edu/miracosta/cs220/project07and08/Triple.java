@@ -1,5 +1,8 @@
 package edu.miracosta.cs220.project07and08;
 
+/**
+    Immutable struct for holding three values. 
+*/
 public class Triple<X, Y, Z> { 
     public final X x; 
     public final Y y; 

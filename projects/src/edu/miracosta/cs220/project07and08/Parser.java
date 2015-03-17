@@ -11,10 +11,11 @@ import java.util.regex.Pattern;
 import java.util.Arrays;
 import java.util.EnumMap;
 
-
-
+/**
+    Transforms an array of VM lines into triples of (Command, firstArgument, secondArguemnt).
+*/
 public class Parser {
-    private ArrayList<String> originalLines; // you guessed it 
+    private ArrayList<String> originalLines;
     private ArrayList<Pair<String,Integer>> cleanedLines; // Cleaned line and original line number 
     private ArrayList<Triple<Command, Object, Integer>> tokenLines; // Command, firstArgument, secondArgument
 
@@ -105,9 +106,7 @@ public class Parser {
                 return Segment.symbolMap.get(string);
             case INTEGER:
                 try {
-                    Integer value = Integer.valueOf(string);
-                    // TODO: Throw exception if value is too big or too small. 
-                    return value;
+                    return Integer.valueOf(string);
                 } catch (Exception e) {
                     throw new RuntimeException("Invalid constant integer: " + "\"" + string + "\"");
                 }
@@ -117,7 +116,6 @@ public class Parser {
             case FUNCTION_NAME:
             default: 
                 throw new RuntimeException("Unimplemented argument: " + argument);
-
         }
     }
 }

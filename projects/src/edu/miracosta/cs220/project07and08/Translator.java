@@ -1,5 +1,8 @@
 package edu.miracosta.cs220.project07and08;
 
+/**
+  Translates one VM command and it's arguments into assembly.
+*/
 public class Translator {
 
     private SymbolTable table;

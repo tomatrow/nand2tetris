@@ -2,6 +2,9 @@ package edu.miracosta.cs220.project07and08;
 
 import java.util.ArrayList;
 
+/**
+    Generates labels. 
+*/
 public class SymbolTable {
     
     private ArrayList<String> fileNames;

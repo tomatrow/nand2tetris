@@ -4,6 +4,9 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+    Enumeraton of all the VM commands. 
+*/
 public enum Command {
     PUSH, POP, AND, OR, NOT, ADD, SUB, NEG, EQ, GT, LT, LABEL, GOTO, IF, FUNCTION, RETURN, CALL; 
 
@@ -205,6 +208,6 @@ public enum Command {
         if (object == null || !object.getClass().equals(Integer.class)) {
             return false;
         }
-        return true; // TODO: Specify range 
+        return true; 
     }
 }

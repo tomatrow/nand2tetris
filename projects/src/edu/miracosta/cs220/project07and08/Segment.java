@@ -3,6 +3,9 @@ package edu.miracosta.cs220.project07and08;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+    Represents memory segments in RAM. 
+*/
 public enum Segment {
     ARGUMENT, LOCAL, STATIC, CONSTANT, THIS, THAT, POINTER, TEMP;
 
@@ -16,20 +19,6 @@ public enum Segment {
         put("pointer", POINTER);
         put("temp", TEMP);
     }};
-
-    /*
-    Special:
-        SP CONSTANT √
-        STATIC √
-    Pointers:
-        LCL LOCAL
-        ARG ARGUMENT
-        THIS THIS
-        THAT THAT
-    Real: 
-        3-4 POINTER √
-        5-12 TEMP √
-    */
 
     public boolean isSpecial() {
         switch (this) {

@@ -1,5 +1,8 @@
 package edu.miracosta.cs220.project07and08;
 
+/**
+    Immutable struct for holding two values.  
+*/
 public class Pair<X, Y> { 
     public final X x; 
     public final Y y; 
