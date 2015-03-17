@@ -22,14 +22,12 @@ public class Translator {
                         return pushStatic(index);
                     case TEMP:
                     case POINTER:
-                        return setDtoRegister(segment.baseAddress() + index) + pushDontoWorkingStack();
+                        return pushReal(segment.baseAddress() + index);
                     case ARGUMENT:
                     case LOCAL:
                     case THIS:
                     case THAT:
                         return dereferencePointerIntoD(segment, index) + pushDontoWorkingStack();
-                    default:
-                        throw new RuntimeException("Unimplemented PUSH segment: " + segment);
                 }
             case POP:
                 switch (segment) {
@@ -37,14 +35,14 @@ public class Translator {
                         return popStatic(index);
                     case TEMP:
                     case POINTER:
-                        return popWorkingStackIntoD() + setRegisterToD(segment.baseAddress() + index);
+                        return popReal(segment.baseAddress() + index);
                     case ARGUMENT:
                     case LOCAL:
                     case THIS:
                     case THAT:
                         return popWorkingStackIntoD() + setReferenceToD(segment, index);
-                    default:
-                        throw new RuntimeException("Unimplemented POP segment: " + segment);
+                    case CONSTANT:
+                        throw new IllegalArgumentException("Constant segment cannot be popped.");
                 }
             default:
                 throw new RuntimeException("Unimplemented Command: " + command.toString());
@@ -59,12 +57,12 @@ public class Translator {
         switch (command) {
             case NOT:
             case NEG:
-                return unaryArithmeticOperation(command);
+                return unaryArithmeticOperation(command.operator());
             case ADD:
             case SUB:
             case OR:
             case AND:
-                return binaryArithmeticOperation(command);
+                return binaryArithmeticOperation(command.operator());
             case EQ:
             case LT:
             case GT:
@@ -74,197 +72,107 @@ public class Translator {
         }
     }
 
-    // Private Helper Strings
-    /*
-        @constant
-        D = A     // D = constant
-        @SP       // A = &SP
-        A = M     // A = SP
-        M = D     // *SP = constant 
-        @SP       // A = &SP
-        M = M + 1 // SP = SP + 1
-    */
+    private String pushReal(int address) {
+        return "@" + address + "\n" +
+               "D = M\n" + 
+               pushDontoWorkingStack(); 
+
+    }
+
     private String pushConstant(Integer constant) {
-        return String.format("@%d\nD = A\n@SP\nA = M\nM = D\n@SP\nM = M + 1\n", constant); 
+        return "@" + constant + "\n" + // A = constant 
+               "D = A\n" + // D = constant
+               "@SP\n" + // A = &SP
+               "A = M\n" + // A = SP
+               "M = D\n" + // *SP = constant 
+               "@SP\n" + // A = &SP
+               "M = M + 1\n"; // SP = SP + 1
     }
-
-    /*
-        popWorkingStackIntoD()
-        @fileName.i // A = fileName.i
-        M = D // *fileName.i = D
-    */
-    private String popStatic(Integer index) {
-        String staticIndexlabel = table.labelForStaticIndex(index);
-
-        return popWorkingStackIntoD() +
-               String.format("@%s // A = %s\n", staticIndexlabel, staticIndexlabel) + 
-               "M = D // *fileName.i = D\n";
-    }
-
-    /*    
-        @fileName.i // A = fileName.i
-        D = M // D = *fileName.i
-        pushDtoStack()
-    */
+    
     private String pushStatic(Integer index) {
-        String staticIndexlabel = table.labelForStaticIndex(index);
-
-        return String.format("@%s // A = %s\n", staticIndexlabel, staticIndexlabel) + 
-               "D = M // D = *fileName.i\n" + 
+        return "@" + table.labelForStaticIndex(index) + "\n" +  // A = staticIndexlabel
+               "D = M\n" +  // D = *fileName.i
                pushDontoWorkingStack();
     }
 
-    /*
-        setRegisterToBoolean(13, true)
-        sub()
-        popWorkingStackIntoD() // D = 0 || !0
+    private String popReal(int address) {
+        return popWorkingStackIntoD() + 
+               "@" + address + "\n" +
+               "M = D\n";
+    }
 
-        |@label
-        |D;OPERATOR // if D == 0 then 
+    private String popStatic(int index) {
+        return popWorkingStackIntoD() +
+               "@" + table.labelForStaticIndex(index) + "\n" +  // A = staticIndexlabel
+               "M = D\n"; // *staticIndexlabel = D
+    }
 
-        |setRegisterToBoolean(13, false) // set ansert to false 
+    private String unaryArithmeticOperation(String operator) {
+        return popWorkingStackIntoD() + 
+               "D = " + operator + "D\n" +  // D = 'operator'D
+               pushDontoWorkingStack();
+    }
 
-        |(label)
-        
-        setDtoRegister(13)
-        pushDontoWorkingStack()
-    */
+    private String binaryArithmeticOperation(String operator) {
+        return popWorkingStackIntoD() + 
+               "@SP\n" + // A = &SP
+               "AM = M - 1\n" + // A = SP - 1; SP = SP - 1;
+               "D = M " + operator + " D\n" + // D = D 'operator' *SP
+               pushDontoWorkingStack();
+    }
+
     private String equalityOperation(Command command) {
         String label = table.labelForJumpCommand(command);
 
-        String formatString = "@%s\nD;%s // if D == 0 then jump\n" +  
-                                      setRegisterToBoolean(13, false) +
-                                      "(%s)\n";
-
-        return setRegisterToBoolean(13, true) + 
-               arithmeticCommand(Command.SUB) + 
+        return "@R13\n" + // A = R13
+               "M = -1\n" + // *R13 = true 
+               binaryArithmeticOperation(Command.SUB.operator()) + 
                popWorkingStackIntoD() +
-               String.format(formatString, label, command.operator(), label) +
-               setDtoRegister(13) +
+               "@" + label + "\n" + // A = label
+               "D;" + command.operator() + "\n" +  // if D == 0 then jump
+               "@R13\n" + // A = R13
+               "M = 0\n" + // *R13 = false
+               "(" + label + ")\n" + 
+               "@R13\n" + // A = R13
+               "D = M\n" + // D = *R13
                pushDontoWorkingStack();
     }
 
-    private String binaryArithmeticOperation(Command command) {
-        return popWorkingStackIntoD()+ useBinaryArithmeticOperatorOnDandTopOfStack(command) + pushDontoWorkingStack();
-    }
-
-    private String unaryArithmeticOperation(Command command) {
-        return popWorkingStackIntoD() + useUnaryOperatorOnD(command) + pushDontoWorkingStack();
-    }
-
-    /*
-        D = 'OPERATOR'D // D = 'OPERATOR'D
-    */
-    private String useUnaryOperatorOnD(Command command) {
-        String operator = command.operator();
-        String formatString = "D = %sD // D = %sD\n";
-        return String.format(formatString, operator, operator);
-    }
-
-    /*            
-        // 'OPERATOR' on D and top of stack 
-        @SP // A = &SP
-        AM = M - 1 // A = SP - 1; SP = SP - 1;
-        D = D 'OPERATOR' M // D = D 'OPERATOR' *SP
-    */
-    private String useBinaryArithmeticOperatorOnDandTopOfStack(Command command) {
-        String operator = command.operator();
-        String formatString = "// %s on D and top of stack\n@SP // A = &SP\nAM = M - 1 // A = SP - 1; SP = SP - 1;\nD = M %s D // D = D %s *SP\n";
-        return String.format(formatString, operator, operator, operator);
-    }
-
-    // D operations 
-
-    /*
-        @R15 // A = R15
-        M = D // *R15 = originalD 
-        @pointerSymbol // A = &pointer
-        D = M // D = pointer
-        @index // A = index
-        D = D + A // D = pointer + index
-        @R14 // A = R14
-        M = D // *R14 = pointer + index 
-        @R15 // A = R15
-        D = M // D = originalD
-        @R14 // A = &(pointer + index)
-        A = M // A = pointer + index
-        M = D // *(pointer + index) = originalD
-    */
     private String setReferenceToD(Segment segment, int index) {
-        if (!segment.isPointer()) {
-            throw new IllegalArgumentException();
-        }
-        String pointerSymbol = segment.pointerSymbol();
-
-        String formatString = "@R15 // A = R15\n" +
-                              "M = D // *R15 = originalD \n" +
-                              "@%s // A = &pointer\n" +
-                              "D = M // D = pointer\n" +
-                              "@%d // A = index\n" +
-                              "D = D + A // D = pointer + index\n" +
-                              "@R14 // A = R14\n" +
-                              "M = D // *R14 = pointer + index \n" +
-                              "@R15 // A = R15\n" +
-                              "D = M // D = originalD\n" +
-                              "@R14 // A = &(pointer + index)\n" +
-                              "A = M // A = pointer + index\n" +
-                              "M = D // *(pointer + index) = originalD\n";
-
-        return String.format(formatString, pointerSymbol, index);
-    }
-    
-    /*
-    @pointerSymbol // A = pointer
-    D = M // D = pointer
-    @index // A = index
-    A = D + A // A = pointer + index
-    D = M // D = *(pointer + index)
-    */
-    private String dereferencePointerIntoD(Segment segment, int index) {
-        if (!segment.isPointer()) {
-            throw new IllegalArgumentException();
-        }
-        String pointerSymbol = segment.pointerSymbol();
-
-        String formatString = "@%s // A = pointer\n" +
-                              "D = M // D = pointer\n" +
-                              "@%d // A = index\n" +
-                              "A = D + A // A = pointer + index\n" +
-                              "D = M // D = *(pointer + index)\n";
-
-        return String.format(formatString, pointerSymbol, index);
-    }
-    private String setDtoRegister(int register) {
-        return String.format("@R%d\nD = M\n", register);
+        return "@R15\n" + // A = R15
+               "M = D\n" + // *R15 = originalD 
+               "@" + segment.pointerSymbol() + "\n" + // A = &pointer
+               "D = M\n" + // D = pointer
+               "@" + index + "\n" + // A = index
+               "D = D + A\n" + // D = pointer + index
+               "@R14\n" + // A = R14
+               "M = D\n" + // *R14 = pointer + index 
+               "@R15\n" + // A = R15
+               "D = M\n" + // D = originalD
+               "@R14\n" + // A = &(pointer + index)
+               "A = M\n" + // A = pointer + index
+               "M = D\n"; // *(pointer + index) = originalD
     }
 
-    private String setRegisterToBoolean(int register, boolean value) {
-        return String.format("@R%d\nM = %d // M[R%d] = true\n", register, ((value)?-1:0), register);
+    private String dereferencePointerIntoD(Segment segment, int index) {        
+        return "@" + segment.pointerSymbol() + "\n" + // A = pointer
+               "D = M\n" + // D = pointer
+               "@" + index + "\n" + // A = index
+               "A = D + A\n" + // A = pointer + index
+               "D = M\n" ; // D = *(pointer + index)
     }
 
-    private String setRegisterToD(int register) {
-        return String.format("@R%d\nM = D\n", register);
-    }
-
-    /*
-        // pop top into D
-        @SP // A = &SP
-        AM = M - 1 // SP = SP - 1; A = SP - 1
-        D = M // D = *SP
-    */
     private String popWorkingStackIntoD() {  
-        return "// pop top into D\n@SP // A = &SP\nAM = M - 1 // SP = SP - 1; A = SP - 1\nD = M // D = *SP\n";
+        return "@SP\n" + // A = &SP
+               "AM = M - 1\n" + // SP = SP - 1; A = SP - 1
+               "D = M\n"; // D = *SP
     }
 
-    /*
-        // push D onto stack 
-        @SP // A = &SP
-        A = M // A = SP
-        M = D // *SP = D
-        @SP // A = &SP
-        M = M + 1 // SP = SP + 1
-    */
     private String pushDontoWorkingStack() {
-        return "// push D onto stack \n@SP // A = &SP\nA = M // A = SP\nM = D // *SP = D\n@SP // A = &SP\nM = M + 1 // SP = SP + 1\n";
+        return "@SP\n" +// A = &SP
+               "A = M\n" +// A = SP
+               "M = D\n" +// *SP = D
+               "@SP\n" +// A = &SP
+               "M = M + 1\n";// SP = SP + 1
     }
 }
