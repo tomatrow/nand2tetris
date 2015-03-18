@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.nio.file.Path;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 
 /**
     Main class. 
@@ -29,22 +30,34 @@ public class Driver {
         // reading 
         ArrayList<String> readlines = new ArrayList<String>(Files.readAllLines(readPath));
 
-        // parsing 
-        Parser parser = new Parser(readlines);
-        parser.parse();
-
-        // encoding
+        // translating 
         SymbolTable table = new SymbolTable();
         table.setFileName(readPath.getFileName().toString().split("\\.vm")[0]);
         Translator translator = new Translator(table);
-        Encoder encoder = new Encoder(translator, parser.getTokenLines());
-        encoder.encode();
+
+        ArrayList<String> writeLines = translate(readlines, translator);
 
         // writing 
         String pathNameWithoutExtention = readPath.toString().split("\\.vm")[0];
         Path writePath = Paths.get(pathNameWithoutExtention + ".asm");
-
+        
         // Not using US_ASCII will break the CPUEmulator...which was a warning in the book.
-        Files.write(writePath, new ArrayList<String>(){{add(encoder.getAssembly());}}, StandardCharsets.US_ASCII); 
+        Files.write(writePath, writeLines, StandardCharsets.US_ASCII); 
+    }
+
+    public static ArrayList<String> translate(ArrayList<String> vmLines, Translator translator) throws ParseException {
+        // parsing 
+        Parser parser = new Parser(vmLines);
+        parser.parse();
+        ArrayList<Triple<Command, Object, Integer>> tokens = parser.getTokenLines();
+
+        // encoding
+        Encoder encoder = new Encoder(translator, tokens);
+        encoder.encode();
+
+        // Files.write() only accepts Lists<? extends CharSequence>
+        ArrayList<String> writeLines = new ArrayList<String>(){{add(encoder.getAssembly());}}; 
+
+        return writeLines;
     }
 }
