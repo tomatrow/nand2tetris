@@ -18,21 +18,7 @@ public class Encoder {
     }
 
     public void encode() {
-        validate();
         translate();
-    }
-
-    public void validate() {
-        for (int i = 0;i < tokens.size();i++) {
-            Triple<Command, Object, Integer> token = tokens.get(i);
-            boolean validFirstArgument = token.x.validFirstArgument(token.y);
-            boolean validSecondArgument = token.x.validSecondArgument(token.z);
-
-            if (!validFirstArgument || !validSecondArgument) {
-                String argumentErrors = "" + ((validFirstArgument)?"":"1") + ((validSecondArgument)?"":", 2");
-                throw new RuntimeException("Invalid token: " + token.toString() + argumentErrors);
-            } 
-        }
     }
 
     private void translate() {

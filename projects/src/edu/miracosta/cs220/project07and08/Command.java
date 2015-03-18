@@ -149,37 +149,6 @@ public enum Command {
         }
     }
 
-    public boolean validFirstArgument(Object object) {
-        switch (this.firstArgument()) {
-            case SEGMENT:
-                if (object == null || !object.getClass().equals(Segment.class)) {
-                    return false;
-                } else {
-                    return true;
-                }
-            case INTEGER:
-                return isValidInteger(object);
-            case NULL:
-                return object == null;
-            case SYMBOL:
-            case FUNCTION_NAME:
-                throw new RuntimeException("Unimplemented");
-            default:
-                return false;
-        }
-    }
-
-    public boolean validSecondArgument(Object object) {
-        switch (this.secondArgument()) {
-            case INTEGER:
-                return isValidInteger(object);
-            case NULL:
-                return object == null;
-            default:
-                return false;
-        }
-    }
-
     public String operator() {
         switch (this) {
             case AND:
