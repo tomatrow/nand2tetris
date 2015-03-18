@@ -8,7 +8,14 @@ public class Translator {
     private SymbolTable table;
 
     public Translator(SymbolTable table) {
+        if (table == null) {
+            throw new IllegalArgumentException("Need a table.");
+        }
         this.table = table;
+    }
+
+    public SymbolTable getTable() {
+        return table;
     }
 
     public String memoryCommand(Command command, Segment segment, Integer index) {
