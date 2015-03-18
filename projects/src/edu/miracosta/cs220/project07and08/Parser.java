@@ -19,6 +19,8 @@ public class Parser {
     private ArrayList<Pair<String,Integer>> cleanedLines; // Cleaned line and original line number 
     private ArrayList<Triple<Command, Object, Integer>> tokenLines; // Command, firstArgument, secondArgument
 
+    private static String labelRegex = "[A-Za-z_.$:]{1}[A-Za-z0-9_.$:]*";    
+
     public Parser(ArrayList<String> vitualMachineLines) {
         this.originalLines = vitualMachineLines;
         this.cleanedLines = null;
@@ -112,7 +114,11 @@ public class Parser {
                 }
             case NULL:
                 return null;
-            case SYMBOL:
+            case SYMBOL: // Just return the string 
+                if (!string.matches(labelRegex)) {
+                    throw new RuntimeException("Invalid label: " + string);
+                }
+                return string;
             case FUNCTION_NAME:
             default: 
                 throw new RuntimeException("Unimplemented argument: " + argument);

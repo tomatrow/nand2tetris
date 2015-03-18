@@ -75,6 +75,28 @@ public class Translator {
         }
     }
 
+    public String flowCommand(Command command, String label) {
+        if (command == null || !command.isFlowCommand()) {
+            throw new IllegalArgumentException("Non flow command: " + command);
+        }
+
+        switch (command) {
+            case LABEL:
+                return "(" + label +  ")" + "\n";
+            case GOTO:
+                return "@" + label + "\n" +
+                       "0;JMP" + "\n";
+            case IF:
+                return memoryCommand(Command.PUSH, Segment.CONSTANT, 0) +
+                       arithmeticCommand(Command.EQ) + 
+                       popWorkingStackIntoD() +
+                       "@" + label + "\n" + 
+                       "D;JEQ" + "\n"; // jump iff (stackTop != 0)
+            default: 
+                throw new RuntimeException("Unimplemented Command: " + command.toString());
+        }
+    }
+
     private String pushStatic(Integer index) {
         return "@" + table.labelForStaticIndex(index) + "\n" +  // A = staticIndexlabel
                "D = M\n" +  // D = *fileName.i

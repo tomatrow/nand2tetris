@@ -32,6 +32,9 @@ public class Encoder {
             } else if (command.isMemoryCommand()) {
                 Segment segment = (Segment) token.y;
                 assemblySegment = translator.memoryCommand(command, segment, token.z);
+            } else if (command.isFlowCommand()) {
+                String label = (String) token.y;
+                assemblySegment = translator.flowCommand(command, label);
             } else {
                 throw new RuntimeException("Unimplemented Command: " + command);
             }

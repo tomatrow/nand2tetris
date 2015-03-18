@@ -124,6 +124,17 @@ public enum Command {
         }
     }
 
+    public boolean isFlowCommand() {
+        switch (this) {
+            case LABEL:
+            case GOTO:
+            case IF:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public boolean isUnaryStackOperation() {
         switch (this) {
             case NOT:
