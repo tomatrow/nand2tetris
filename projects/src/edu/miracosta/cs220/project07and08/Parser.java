@@ -114,12 +114,12 @@ public class Parser {
                 }
             case NULL:
                 return null;
+            case FUNCTION_NAME:
             case SYMBOL: // Just return the string 
                 if (!string.matches(labelRegex)) {
                     throw new RuntimeException("Invalid label: " + string);
                 }
                 return string;
-            case FUNCTION_NAME:
             default: 
                 throw new RuntimeException("Unimplemented argument: " + argument);
         }

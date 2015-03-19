@@ -35,10 +35,13 @@ public class Encoder {
             } else if (command.isFlowCommand()) {
                 String label = (String) token.y;
                 assemblySegment = translator.flowCommand(command, label);
+            } else if (command.isFunctionCommand()) {
+                String label = (String) token.y;
+                Integer number = token.z;
+                assemblySegment = translator.functionCommand(command, label, number);
             } else {
                 throw new RuntimeException("Unimplemented Command: " + command);
             }
-
             assembly.append(assemblySegment);
         }
     }

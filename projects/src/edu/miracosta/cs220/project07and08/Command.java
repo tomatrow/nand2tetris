@@ -135,6 +135,17 @@ public enum Command {
         }
     }
 
+    public boolean isFunctionCommand() {
+        switch (this) {
+            case RETURN:
+            case FUNCTION:
+            case CALL:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public boolean isUnaryStackOperation() {
         switch (this) {
             case NOT:

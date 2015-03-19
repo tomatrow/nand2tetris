@@ -104,6 +104,79 @@ public class Translator {
         }
     }
 
+    public String functionCommand(Command command, String label, Integer number) {
+        if (command == null || !command.isFunctionCommand()) {
+            throw new IllegalArgumentException("Non function command: " + command);
+        }
+
+        switch (command) {
+            case FUNCTION:
+                String functionDeclaration = "(" + label + ")" + "\n";
+                String localInitailization = "";
+                for (int x = 0;x < number;x++) {
+                    localInitailization += memoryCommand(Command.PUSH, Segment.CONSTANT, 0);
+                }
+                return functionDeclaration +
+                       localInitailization;
+            case RETURN:
+                return returnFromFunction();
+            case CALL:
+            default:
+                throw new RuntimeException("Unimplemented Command: " + command.toString());
+        }
+    }
+
+    private String returnFromFunction() {
+        /* FRAME = LCL
+           *ARG = pop()
+           SP = ARG+1
+           THAT = *(FRAME - 1)
+           THIS = *(FRAME - 2)
+           ARG = *(FRAME - 3) 
+           LCL = *(FRAME - 4)
+           RET = *(FRAME - 5)
+           goto RET */
+        String returnFromFunction = "";
+        
+        // FRAME = LCL
+        returnFromFunction += "@LCL\n" + // A = &LCL
+                              "D = M\n" + // D = LCL
+                              "@R13\n" + // A = &R13
+                              "M = D\n"; // R13 = LCL
+        // *ARG = pop()
+        returnFromFunction += popWorkingStackIntoD() + // D = pop()
+                              "@ARG\n" + // A = &ARG
+                              "A = M\n" + // A = ARG
+                              "M = D\n"; // *ARG = pop()
+        // SP = ARG+1                     
+        returnFromFunction += "@ARG\n" + // A = &ARG
+                              "D = M + 1\n" + // D = ARG + 1 
+                              "@SP\n" + // A = &SP
+                              "M = D\n"; // SP = ARG + 1             
+
+
+        // THAT = *(FRAME - 1)
+        // THIS = *(FRAME - 2)
+        // ARG = *(FRAME - 3) 
+        // LCL = *(FRAME - 4)
+        String setDtoDecrementedFramePointer = "@R13\n" + // A = &R13
+                                               "AM = M - 1\n" + // AM = R13 - 1
+                                               "D = M\n"; // D = *(R13 - 1)
+        Segment[] segments = {Segment.THAT, Segment.THIS, Segment.ARGUMENT, Segment.LOCAL};
+        for (int x = 0; x < segments.length;x++) {
+            returnFromFunction += setDtoDecrementedFramePointer;
+            returnFromFunction += setPointerToD(segments[x]);
+        }
+
+        // RET = *(FRAME - 5)
+        returnFromFunction += setDtoDecrementedFramePointer + // D = *(R13 - 5)
+                              // goto RET     
+                              "A = D\n" + // A = *(R13 - 5)
+                              "0;JMP\n"; // jump to RET
+
+        return returnFromFunction;
+    }
+
     private String pushStatic(Integer index) {
         return "@" + table.labelForStaticIndex(index) + "\n" +  // A = staticIndexlabel
                "D = M\n" +  // D = *fileName.i
@@ -178,6 +251,11 @@ public class Translator {
                "@R13\n" + // A = R13
                "D = M\n" + // D = *R13
                pushDontoWorkingStack();
+    }
+
+    private String setPointerToD(Segment segment) {
+        return "@" + segment.pointerSymbol() + "\n" + // A = &pointer
+               "M = D\n"; // pointer = D
     }
 
     private String setReferenceToD(Segment segment, int index) {
