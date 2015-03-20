@@ -18,6 +18,14 @@ public class Translator {
         return table;
     }
 
+    public String bootStrap() {
+        return "@256\n" + 
+               "D = A\n" + 
+               "@SP\n" +
+               "M = D\n" + 
+               functionCommand(Command.CALL, "Sys.init", 0);
+    }
+
     public String memoryCommand(Command command, Segment segment, Integer index) {
         if (command == null || !command.isMemoryCommand()) {
             throw new IllegalArgumentException("Non memory command: " + command);
