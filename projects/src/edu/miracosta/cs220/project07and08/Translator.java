@@ -132,9 +132,64 @@ public class Translator {
             case RETURN:
                 return returnFromFunction();
             case CALL:
+                return call(label, number);
             default:
                 throw new RuntimeException("Unimplemented Command: " + command.toString());
         }
+    }
+
+    private String call(String functionName, int argumentCount) {
+        /*   push return-address
+             push LCL
+             push ARG
+             push THIS
+             push THAT
+             ARG = SP-(N+5)
+             LCL = SP
+             goto f
+         (return-address) 
+        */
+        String call = "";
+
+        String returnAddress = table.labelForFunctionReturn();        
+        
+        // push return-address
+        call += "@" + returnAddress + "\n" + // A = return-address
+                "D = A\n" + // D = return-address
+                pushDontoWorkingStack(); // push(return-address)  
+
+        // push LCL
+        // push ARG
+        // push THIS
+        // push THAT
+        Segment[] segments = { Segment.LOCAL, Segment.ARGUMENT, Segment.THIS, Segment.THAT };
+        for (int x = 0; x < segments.length;x++) {
+            call += setDtoPointer(segments[x]) + 
+                    pushDontoWorkingStack();
+        }
+
+        // ARG = SP-(N+5)
+        call += "@SP\n" + // A = &SP
+                "D = M\n" + // D = SP
+                "@" + (argumentCount + 5) + "\n" + // A = argumentCount + 5
+                "D = D - A\n" + // D = SP - argumentCount - 5
+                "@ARG\n" + // A = &ARG
+                "M = D\n"; // ARG = SP - argumentCount - 5
+        
+        // LCL = SP
+        call += "@SP\n" + // A = &SP
+                "D = M\n" + // D = SP
+                "@LCL\n" + // A = &LCL
+                "M = D\n"; // LCL = SP
+        
+        // goto f        
+        call += "@" + functionName + "\n" + 
+                "0;JMP\n";
+
+        // (return-address)
+        call += "(" + returnAddress + ")" + "\n";
+
+        return call;
     }
 
     private String returnFromFunction() {
@@ -267,6 +322,11 @@ public class Translator {
     private String setPointerToD(Segment segment) {
         return "@" + segment.pointerSymbol() + "\n" + // A = &pointer
                "M = D\n"; // pointer = D
+    }
+
+    private String setDtoPointer(Segment segment) {
+        return "@" + segment.pointerSymbol() + "\n" + // A = &pointer
+               "D = M\n"; // D = pointer
     }
 
     private String setReferenceToD(Segment segment, int index) {
