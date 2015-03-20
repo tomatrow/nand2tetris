@@ -19,7 +19,7 @@ public class Parser {
     private ArrayList<Pair<String,Integer>> cleanedLines; // Cleaned line and original line number 
     private ArrayList<Triple<Command, Object, Integer>> tokenLines; // Command, firstArgument, secondArgument
 
-    private static String labelRegex = "[A-Za-z_.$:]{1}[A-Za-z0-9_.$:]*";    
+    private static String symbolRegex = "[A-Za-z_.$:]{1}[A-Za-z0-9_.$:]*";    
 
     public Parser(ArrayList<String> vitualMachineLines) {
         this.originalLines = vitualMachineLines;
@@ -116,7 +116,7 @@ public class Parser {
                 return null;
             case FUNCTION_NAME:
             case SYMBOL: // Just return the string 
-                if (!string.matches(labelRegex)) {
+                if (!string.matches(symbolRegex)) {
                     throw new RuntimeException("Invalid label: " + string);
                 }
                 return string;

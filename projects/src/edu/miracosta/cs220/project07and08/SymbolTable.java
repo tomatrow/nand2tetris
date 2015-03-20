@@ -59,7 +59,7 @@ public class SymbolTable {
     }
 
     public String labelForStaticIndex(Integer i) {
-        return getFileName() + "." + i;
+        return getFileName() + ".static" + i;
     }
     public String labelForFunctionReturn() {
         String label = getFileName() + ".functionReturn" + functionReturnCounter;
