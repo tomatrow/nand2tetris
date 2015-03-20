@@ -87,17 +87,19 @@ public class Translator {
             throw new IllegalArgumentException("Non flow command: " + command);
         }
 
+        String fullLabel = table.labelForFlowCommand(label);
+
         switch (command) {
             case LABEL:
-                return "(" + label +  ")" + "\n";
+                return "(" + fullLabel + ")" + "\n";
             case GOTO:
-                return "@" + label + "\n" +
+                return "@" + fullLabel + "\n" +
                        "0;JMP" + "\n";
             case IF:
                 return memoryCommand(Command.PUSH, Segment.CONSTANT, 0) +
                        arithmeticCommand(Command.EQ) + 
                        popWorkingStackIntoD() +
-                       "@" + label + "\n" + 
+                       "@" + fullLabel + "\n" + 
                        "D;JEQ" + "\n"; // jump iff (stackTop != 0)
             default: 
                 throw new RuntimeException("Unimplemented Command: " + command.toString());
@@ -111,6 +113,7 @@ public class Translator {
 
         switch (command) {
             case FUNCTION:
+                table.setFunctionName(label);
                 String functionDeclaration = "(" + label + ")" + "\n";
                 String localInitailization = "";
                 for (int x = 0;x < number;x++) {

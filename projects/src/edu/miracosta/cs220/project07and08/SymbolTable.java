@@ -8,11 +8,15 @@ import java.util.ArrayList;
 public class SymbolTable {
     
     private ArrayList<String> fileNames;
+    private ArrayList<String> functionNames;
     private int jumpLabelCounter;
+    private int functionReturnCounter;
 
     SymbolTable() {
         fileNames = new ArrayList<String>();
+        functionNames = new ArrayList<String>();
         jumpLabelCounter = 0;
+        functionReturnCounter = 0;
     }
 
     public String getFileName() {
@@ -31,6 +35,18 @@ public class SymbolTable {
         fileNames.add(fileName);
     }
 
+    public String getFunctionName() {
+        if (functionNames.size() == 0) {
+            return null;
+        }
+
+        return functionNames.get(functionNames.size() - 1);
+    }
+
+    public void setFunctionName(String functionName) {
+        functionNames.add(functionName);
+    }
+
     public String labelForJumpCommand(Command command) {
         if (command == null || !command.isJumpCommand()) {
             throw new IllegalArgumentException("Not a jump command:" + "\"" + command + "\"");
@@ -44,5 +60,14 @@ public class SymbolTable {
 
     public String labelForStaticIndex(Integer i) {
         return getFileName() + "." + i;
+    }
+    public String labelForFunctionReturn() {
+        String label = getFileName() + ".functionReturn" + functionReturnCounter;
+        functionReturnCounter++;
+        return label;
+    }
+
+    public String labelForFlowCommand(String label) {
+        return getFunctionName() + "$" + label;
     }
 }
