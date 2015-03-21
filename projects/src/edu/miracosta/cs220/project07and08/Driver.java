@@ -11,6 +11,10 @@ import java.text.ParseException;
 import java.util.stream.Collectors;
 import java.nio.file.LinkOption;
 
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
+
 /**
     Main class. 
     Usage: `java Driver path/to/vmfile.vm`
@@ -18,14 +22,22 @@ import java.nio.file.LinkOption;
 public class Driver {
     public static String ORIGINAL_EXTENTION = "vm";
     public static String TRANSLATION_EXTENTION = "asm";
+    public static boolean DEBUG = true;
 
     public static void main(String[] args) throws Exception {
-        // paths 
-        if (args.length == 0) {
-            throw new IOException("No Virtual Machine path to read.");
+        if (args.length != 0) { 
+            run(args[0], true);
+        } else {
+            if (DEBUG) {
+                test();
+            } else {
+                throw new IllegalArgumentException("USAGE: \"java Driver path/to/vmfile.vm\"");   
+            }
         }
+    }
 
-        String pathName = args[0];
+    public static void run(String pathName, boolean bootStrap) throws Exception {
+        // paths 
         Path programDirectory = Paths.get(pathName);
         if (!Files.isDirectory(programDirectory, LinkOption.NOFOLLOW_LINKS)) {
             throw new IOException("Not a valid directoy: " + programDirectory);
@@ -39,6 +51,10 @@ public class Driver {
         // translating 
         Translator translator = new Translator(new SymbolTable());
         List<String> writeLines = new ArrayList<String>(); // Files.write() only accepts Lists<? extends CharSequence>
+
+        if (bootStrap) {
+            writeLines.add(translator.bootStrap());
+        }
 
         for (Path vmFilePath : vmFilePaths) {
             String fileNameWithoutExtention = vmFilePath.getFileName().toString().split("\\." + ORIGINAL_EXTENTION)[0];
@@ -66,5 +82,12 @@ public class Driver {
         encoder.encode();
 
         return encoder.getAssembly();
+    }
+
+    public static void test() {
+        System.out.println("RUNNING TESTS.");     
+        JUnitCore.runClasses(DriverTest.class).getFailures()
+            .stream()
+            .forEach(System.out::println);
     }
 }
