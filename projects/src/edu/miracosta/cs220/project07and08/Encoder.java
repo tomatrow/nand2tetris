@@ -2,6 +2,8 @@ package edu.miracosta.cs220.project07and08;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Optional;
+
 /**
     Encode a series of (Command,Object,Integer) triples into an assembly program. 
 */
@@ -9,44 +11,50 @@ public class Encoder {
 
     private Translator translator;
     private ArrayList<Triple<Command, Object, Integer>> tokens;
-    private StringBuilder assembly;
+    private AssemblySection fileSection;
 
     public Encoder(Translator translator, ArrayList<Triple<Command, Object, Integer>> tokens) {
         this.translator = translator;
         this.tokens = tokens;
-        this.assembly = new StringBuilder();
+        this.fileSection = null;
     }
 
     public void encode() {
-        translate();
+        this.fileSection = translate();
     }
 
-    private void translate() {
+    private AssemblySection translate() {
+        AssemblySection fileSection = new AssemblySection(translator.getTable().getFileName());
+
         for (int i = 0;i < tokens.size();i++) {
             Triple<Command, Object, Integer> token = tokens.get(i);
-            String assemblySegment;
+            AssemblySection section;
             Command command = token.x;
 
             if (command.isArithmeticOperation()) {
-                assemblySegment = translator.arithmeticCommand(command);
+                section = translator.arithmeticCommand(command);
             } else if (command.isMemoryCommand()) {
                 Segment segment = (Segment) token.y;
-                assemblySegment = translator.memoryCommand(command, segment, token.z);
+                section = translator.memoryCommand(command, segment, token.z);
             } else if (command.isFlowCommand()) {
                 String label = (String) token.y;
-                assemblySegment = translator.flowCommand(command, label);
+                section = translator.flowCommand(command, label);
             } else if (command.isFunctionCommand()) {
                 String label = (String) token.y;
                 Integer number = token.z;
-                assemblySegment = translator.functionCommand(command, label, number);
+                section = translator.functionCommand(command, label, number);
             } else {
                 throw new RuntimeException("Unimplemented Command: " + command);
             }
-            assembly.append(assemblySegment);
+
+            fileSection.addSection(section);
         }
+
+        return fileSection;
     }
 
-    public String getAssembly() {
-        return assembly.toString();
+
+    public AssemblySection getAssemblyFileSection() {
+        return fileSection;
     }
 }

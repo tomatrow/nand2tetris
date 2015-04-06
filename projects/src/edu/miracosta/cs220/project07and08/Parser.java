@@ -19,7 +19,7 @@ public class Parser {
     private ArrayList<Pair<String,Integer>> cleanedLines; // Cleaned line and original line number 
     private ArrayList<Triple<Command, Object, Integer>> tokenLines; // Command, firstArgument, secondArgument
 
-    private static String symbolRegex = "[A-Za-z_.$:]{1}[A-Za-z0-9_.$:]*";    
+    public static String symbolRegex = "[A-Za-z_.$:]{1}[A-Za-z0-9_.$:]*";    
 
     public Parser(ArrayList<String> vitualMachineLines) {
         this.originalLines = vitualMachineLines;

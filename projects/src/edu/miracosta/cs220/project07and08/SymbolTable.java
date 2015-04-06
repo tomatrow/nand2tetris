@@ -14,7 +14,9 @@ public class SymbolTable {
 
     SymbolTable() {
         fileNames = new ArrayList<String>();
-        functionNames = new ArrayList<String>();
+        functionNames = new ArrayList<String>(){{
+            add("GLOBAL");
+        }};
         jumpLabelCounter = 0;
         functionReturnCounter = 0;
     }

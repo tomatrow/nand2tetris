@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.stream.Collectors;
 import java.nio.file.LinkOption;
+import java.util.Optional;
 
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -22,7 +23,7 @@ import org.junit.runner.notification.Failure;
 public class Driver {
     public static String ORIGINAL_EXTENTION = "vm";
     public static String TRANSLATION_EXTENTION = "asm";
-    public static boolean DEBUG = true;
+    public static boolean DEBUG = false;
 
     public static void main(String[] args) throws Exception {
         if (args.length != 0) { 
@@ -50,10 +51,10 @@ public class Driver {
 
         // translating 
         Translator translator = new Translator(new SymbolTable());
-        List<String> writeLines = new ArrayList<String>(); // Files.write() only accepts Lists<? extends CharSequence>
+        AssemblySection program = new AssemblySection(programDirectory.getFileName().toString());
 
         if (bootStrap) {
-            writeLines.add(translator.bootStrap());
+            program.addSection(translator.bootStrap());
         }
 
         for (Path vmFilePath : vmFilePaths) {
@@ -61,17 +62,17 @@ public class Driver {
             translator.getTable().setFileName(fileNameWithoutExtention);
 
             ArrayList<String> readlines = new ArrayList<String>(Files.readAllLines(vmFilePath));
-            String translation = translate(readlines, translator);
-            writeLines.add(translation);
+            program.addSection(translate(readlines, translator));
         }
 
         // writing 
         Path assemblyFilepath = Paths.get(programDirectory.getFileName() + "." + TRANSLATION_EXTENTION);
         Path writePath = programDirectory.resolve(assemblyFilepath);
+        ArrayList<String> writeLines = program.getAssemblyWithStartIndex(Optional.of(0));
         Files.write(writePath, writeLines, StandardCharsets.US_ASCII); // Not using US_ASCII will break the CPUEmulator...which was a warning in the book.
     }
 
-    public static String translate(ArrayList<String> vmLines, Translator translator) throws ParseException {
+    public static AssemblySection translate(ArrayList<String> vmLines, Translator translator) throws ParseException {
         // parsing 
         Parser parser = new Parser(vmLines);
         parser.parse();
@@ -81,7 +82,7 @@ public class Driver {
         Encoder encoder = new Encoder(translator, tokens);
         encoder.encode();
 
-        return encoder.getAssembly();
+        return encoder.getAssemblyFileSection();
     }
 
     public static void test() {

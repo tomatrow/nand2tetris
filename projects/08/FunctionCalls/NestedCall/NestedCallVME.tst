@@ -12,15 +12,15 @@ set RAM[3] -1,
 set RAM[4] -1,
 set RAM[256] 1234, // fake RIP
 set RAM[257] -1,
-set RAM[258] -1,
-set RAM[259] -1,
-set RAM[260] -1,
+set RAM[258] -2,
+set RAM[259] -3,
+set RAM[260] -4,
 
 set sp 261,
 set local 261,
 set argument 256,
-set this 3000,
-set that 4000;
+set this 4000,
+set that 5000;
 
 repeat 50 {
   vmstep;

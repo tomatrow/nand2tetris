@@ -1,0 +1,19 @@
+
+// if (false) {
+//     do nothing 
+// } else {
+//     push 254   
+// }
+
+push constant 1
+neg
+
+if-goto PUSH_254 
+goto END_PROGRAM
+
+label PUSH_254
+push constant 254 // RAM[256] = 254
+
+label END_PROGRAM // RAM[256] = 254, RAM[0] = 257
+
+

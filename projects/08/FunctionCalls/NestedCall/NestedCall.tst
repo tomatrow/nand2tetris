@@ -12,10 +12,12 @@ set RAM[3] -1,
 set RAM[4] -1,
 set RAM[256] 1234, // fake RIP
 set RAM[257] -1,
-set RAM[258] -1,
-set RAM[259] -1,
-set RAM[260] -1,
+set RAM[258] -2,
+set RAM[259] -3,
+set RAM[260] -4,
 
+set RAM[3] 4000,
+set RAM[4] 5000;
 repeat 1000 {
   ticktock;
 }
