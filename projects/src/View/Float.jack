@@ -1,0 +1,100 @@
+/* 
+    Down to earth description of floating point arithmetic. 
+    http://www.petebecker.com/js/js200006.html
+*/
+
+class Float {
+    field int mantissa, exponent; 
+
+    constructor Float new(int Amantissa, int Aexponent) {
+        let mantissa = Amantissa;
+        let exponent = Aexponent;
+
+        return this;
+    }
+
+    method int getMantessa() {
+        return mantissa;
+    }
+
+    method int getExponent() {
+        return exponent;
+    }
+    method String description() {
+        var String man, exp;
+        
+        let man = String.new(6);
+        // let exp = String.new(6);
+
+        do man.setInt(mantissa);
+        // do exp.setInt(exponent);
+
+        return man;
+    }
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method void add(Float float) {
+        var int expDifference, otherMantessa, otherExponent;
+
+        let otherMantessa = float.getMantessa();
+        let otherExponent = float.getExponent();
+        let expDifference = mantissa - otherMantessa;
+
+        if (expDifference > 5) {
+            return; // it's too small to matter 
+        }
+
+        // do Output.printInt(expDifference);
+        // do Output.println();
+        if (expDifference = 0) {
+            let mantissa = mantissa + otherMantessa;
+            return;
+        }
+
+        if (expDifference > 0) {
+            while (expDifference > 0) {
+                let expDifference = expDifference - 1;
+                let otherExponent = otherExponent + 1;
+                let otherMantessa = otherMantessa / 10;
+            }
+        } else { // it's less than zero 
+            while (expDifference < 0) {
+                let expDifference = expDifference + 1;
+                let exponent = exponent + 1;
+                let mantissa = mantissa / 10;
+            }
+            do normalize();
+        }
+
+        return;
+    }
+
+    method void sub(Float float) {
+        var Float temp;
+        let temp = Float.new(-float.getMantessa(), float.getExponent());
+        do add(temp);
+        do temp.dispose();
+        return;
+    }
+    // method void mult(Float float) {
+    //     let mantissa = Math.multiply(float.mantissa, mantissa);
+    //     let exponent = float.exponent + exponent;
+        
+    //     return;
+    // }
+    // method void div(Float float) {
+    //     do Memory.error(1);
+    //     return;
+    // }
+
+    method void normalize() {
+        while (mantissa > 9999) {
+            let mantissa = mantissa / 10;
+            let exponent = exponent + 1;
+        }
+        return;
+    }
+}

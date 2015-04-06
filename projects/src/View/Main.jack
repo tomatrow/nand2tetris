@@ -1,0 +1,20 @@
+class Main {
+    function void main() {
+        var Float test1, test2;
+
+        let test1 = Float.new(10,0);
+        let test2 = Float.new(10,1);
+        
+        do Output.printInt(test1.getMantessa());
+        do Output.println();
+        do test1.add(test2);
+        do Output.printInt(test1.getMantessa());
+
+
+        do test1.dispose();
+        do test2.dispose();
+
+        return;
+    }
+}
+

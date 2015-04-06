@@ -1,0 +1,15 @@
+class Rect {
+    field Float width, height;
+
+    constructor Rect new(Float Awidth, Float Aheight) {
+        let width = Awidth;
+        let height = Aheight;
+
+        return this;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+}

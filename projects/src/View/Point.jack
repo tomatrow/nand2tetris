@@ -1,0 +1,9 @@
+class Point {
+    field Float x, y;
+    constructor Point new(Float Ax, Float Ay) {
+        let x = Ax;
+        let y = Ay;
+        
+        return this;
+    }
+}
