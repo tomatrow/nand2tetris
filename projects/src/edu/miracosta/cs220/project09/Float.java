@@ -1,19 +1,22 @@
 package edu.miracosta.cs220.project09;
 
-public class Float {
-    private short mantissa;
-    private short exponent;
+class Float {
+    static final Float zero = new Float((short)0, (short)0);
+    static final Float one = new Float((short)1, (short)0);
 
-    public Float(short mantissa, short exponent) {
+    short mantissa;
+    short exponent;
+
+    Float(short mantissa, short exponent) {
         this.mantissa = mantissa;
         this.exponent = exponent;
     }
 
-    public short getExponent() {
+    short getExponent() {
         return exponent;
     }
-
-    public short getMantissa() {
+ 
+    short getMantissa() {
         return mantissa;
     }
 
@@ -21,7 +24,7 @@ public class Float {
         return "(M:" + mantissa + ", E:" + exponent + ")";
     }
 
-    public void add(Float f) {
+    void add(Float f) {
         short otherExp = f.getExponent();
         short otherMan = f.getMantissa();
         short exDiff = (short)(this.exponent - otherExp);
@@ -53,34 +56,82 @@ public class Float {
         }
     }
 
-    public void sub(Float f) {
-        add(new Float((short)-f.getMantissa(), f.getExponent()));
+    void sub(Float f) {
+        Float neg = f.copy();
+        neg.neg();
+        add(neg);
+        // destroy neg 
     }
 
-    public void mult(Float f) {
+    void mult(Float f) {
         this.exponent += f.getExponent();
         this.mantissa *= f.getMantissa();
-        normalize();
+        normaenlize();
     }
 
-    public void div(Float f) {
+    void div(Float f) {
         this.exponent -= f.getExponent();
         this.mantissa /= f.getMantissa();
         normalize();
     }
 
-    public void normalize() {
+    void normalize() {
         while (Math.abs(mantissa) > 9999) {
             mantissa /= 10;
             exponent++;
         }
     }
 
-    public short toShort() {
+    void neg() {
+        this.mantissa *= (short)-1;
+    }
+
+    // boolean lessThan(Float f) {
+    //     short otherExp = f.getExponent();
+    //     short otherMan = f.getMantissa();
+    //     short thisMan;
+    //     short exDiff = (short)(this.exponent - otherExp);
+
+    //     if (exDiff > 0) { // this is greater than that 
+    //         while (otherExp < exponent) {
+    //             otherExp++;
+    //             otherMan /= 10;
+    //         }
+
+    //         return mantissa < otherMan;
+    //     } else if (exDiff < 0){ // that is greater than this 
+    //         thisMan = mantissa;
+    //         while (exDiff < 0) {
+    //             exDiff++;
+    //             thisMan /= 10;
+    //         }
+
+    //         return thisMan < otherMan;
+    //     } else { // they are equal
+    //         return mantissa < otherMan;
+    //     }
+    // }
+
+    // boolean greaterThan(Float f) {
+    //     return !lessThan(f) && !equals(f);
+    // }
+
+    boolean equals(Float f) {
+        boolean sameMantissa = mantissa == f.getMantissa();
+        boolean sameExponent = exponent == f.getExponent();
+
+        return sameMantissa && sameExponent || sameMantissa && isZero();
+    }
+
+    boolean isZero() {
+        return mantissa == 0;
+    }
+
+    short toShort() {
         return (short)((short)this.mantissa * (short)Math.pow(10, this.exponent));
     }
 
-    public Float copy() {
+    Float copy() {
         return new Float(this.mantissa, this.exponent);
     }
 }

@@ -13,88 +13,121 @@ class Float {
         return this;
     }
 
-    method int getMantessa() {
+    function Float default() {
+        return Float.new(0,0);
+    }
+
+    method int getMantissa() {
         return mantissa;
     }
 
     method int getExponent() {
         return exponent;
     }
-    method String description() {
-        var String man, exp;
-        
-        let man = String.new(6);
-        // let exp = String.new(6);
 
-        do man.setInt(mantissa);
-        // do exp.setInt(exponent);
-
-        return man;
-    }
     method void dispose() {
         do Memory.deAlloc(this);
         return;
     }
 
-    method void add(Float float) {
-        var int expDifference, otherMantessa, otherExponent;
+    method void add(Float f) {
+        var int otherExp, otherMan, exDiff;
 
-        let otherMantessa = float.getMantessa();
-        let otherExponent = float.getExponent();
-        let expDifference = mantissa - otherMantessa;
+        let otherExp = f.getExponent();
+        let otherMan = f.getMantissa();
+        let exDiff = exponent - otherExp;
 
-        if (expDifference > 5) {
-            return; // it's too small to matter 
-        }
-
-        // do Output.printInt(expDifference);
-        // do Output.println();
-        if (expDifference = 0) {
-            let mantissa = mantissa + otherMantessa;
+        // no point in adding if they're too far apart
+        if (Math.abs(exDiff) > 4) {
+            if (exDiff > 0) { 
+                let mantissa = otherMan;
+                let exponent = otherExp;
+            } 
             return;
         }
 
-        if (expDifference > 0) {
-            while (expDifference > 0) {
-                let expDifference = expDifference - 1;
-                let otherExponent = otherExponent + 1;
-                let otherMantessa = otherMantessa / 10;
+        if (exDiff > 0) { // this is greater than that 
+            while (otherExp < exponent) {
+                let otherExp = otherExp + 1;
+                let otherMan = otherMan / 10;
             }
-        } else { // it's less than zero 
-            while (expDifference < 0) {
-                let expDifference = expDifference + 1;
-                let exponent = exponent + 1;
-                let mantissa = mantissa / 10;
+            let mantissa = mantissa + otherMan;
+        } else {
+            if (exDiff < 0) { // that is greater than this 
+                while (exponent < otherExp) {
+                    let exponent = exponent + 1;
+                    let mantissa = mantissa / 10;
+                }
+                let mantissa = mantissa + otherMan;
+                do normalize();
+            } else { // they are equal
+                let mantissa = mantissa + otherMan;
             }
-            do normalize();
         }
 
         return;
     }
 
-    method void sub(Float float) {
+    method void sub(Float f) {
         var Float temp;
-        let temp = Float.new(-float.getMantessa(), float.getExponent());
+        let temp = f.copy();
+        do temp.neg();
         do add(temp);
         do temp.dispose();
         return;
     }
-    // method void mult(Float float) {
-    //     let mantissa = Math.multiply(float.mantissa, mantissa);
-    //     let exponent = float.exponent + exponent;
-        
-    //     return;
-    // }
-    // method void div(Float float) {
-    //     do Memory.error(1);
-    //     return;
-    // }
+
+    method void mult(Float f) {
+        let exponent = exponent + f.getExponent();
+        let mantissa = mantissa * f.getMantissa();
+        do normalize();
+        return;
+    }
+
+    method void div(Float f) {
+        let exponent = exponent - f.getExponent();
+        let mantissa = mantissa / f.getMantissa();
+        do normalize();
+        return;
+    }
+
+    method void neg() {
+        let mantissa = mantissa * -1;
+        return;
+    }
 
     method void normalize() {
-        while (mantissa > 9999) {
+        while (Math.abs(mantissa) > 9999) {
             let mantissa = mantissa / 10;
             let exponent = exponent + 1;
         }
         return;
+    }
+
+    method Float copy() {
+        return Float.new(mantissa, exponent);
+    }
+
+    method int toInt() {
+        var int m, e;
+
+        let m = mantissa;
+        let e = exponent;
+
+        if (~(e = 0)) {
+            if (e > 0) {
+                while (e > 0) {
+                    let e = e - 1;
+                    let m = m * 10;
+                }
+            } else {
+                while (e < 0) {
+                    let e = e + 1;
+                    let m = m / 10;
+                }
+            }
+        }
+
+        return m;
     }
 }

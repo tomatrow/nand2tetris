@@ -1,18 +1,30 @@
 class Main {
     function void main() {
-        var Float test1, test2;
+        do Main.demo();
+        return;
+    }
 
-        let test1 = Float.new(10,0);
-        let test2 = Float.new(10,1);
+    function void demo() {
+        var View view;
+        var Transform transform;
+        var Float scale, initalSize, translation;
+
+        let initalSize = Float.new(10,0);
+        let translation = Float.new(5,0);
+        let scale = Float.new(2,0);
+
+        let transform = Transform.default();
+        let view = View.new(transform, Rect.new(Point.default(), Size.new(initalSize.copy(), initalSize.copy())), true);
         
-        do Output.printInt(test1.getMantessa());
-        do Output.println();
-        do test1.add(test2);
-        do Output.printInt(test1.getMantessa());
+        do transform.scale(scale, scale);
+        do transform.translate(translation, translation);
 
+        do Views.draw(view);
 
-        do test1.dispose();
-        do test2.dispose();
+        do scale.dispose();
+        do view.dispose();
+        do initalSize.dispose();
+        do translation.dispose();
 
         return;
     }

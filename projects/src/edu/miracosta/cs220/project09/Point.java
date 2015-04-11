@@ -1,17 +1,27 @@
-public class Point {
-    private Float x;
-    private Float y;
+package edu.miracosta.cs220.project09;
 
-    public Point(Float x, Float y) {
+class Point {
+    Float x;
+    Float y;
+
+    Point(Float x, Float y) {
         this.x = x;
         this.y = y;
     }
 
-    public Float getX() {
+    Float getX() {
         return this.x;
+    } 
+
+    Float getY() {
+        return this.y;
     }
 
-    public Float getY() {
-        return this.y;
+    Point copy() {
+        return new Point(x,y);
+    }
+
+    public String toString() {
+        return String.format("(%s, %s)", x, y);
     }
 }

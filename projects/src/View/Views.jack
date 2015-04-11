@@ -1,0 +1,48 @@
+class Views {
+    function void draw(View view) {
+        var Transform transform;
+        var Rect frame;
+        var Array points;
+
+        let frame = view.getFrame();
+        let frame = frame.copy();
+        let transform = view.getTransform();
+        do transform.rect(frame);
+
+        let points = Views.getDrawCoordinates(frame.getOrigin(), frame.getSize());
+
+        do Screen.setColor(view.getColor());
+        do Screen.drawRectangle(points[0],points[1],points[2],points[3]);
+
+        do points.dispose();
+
+        return;
+    }
+
+    function void clear() {
+        do Screen.clearScreen();
+
+        return;
+    }
+
+    function Array getDrawCoordinates(Point origin, Size size) {
+        var Float x1, y1, x2, y2;
+        var Array points;
+
+        let x1 = origin.getX();
+        let x2 = x1.copy();
+        do x2.add(size.getWidth());
+        let y1 = origin.getY();
+        let y2 = y1.copy();
+        do y2.add(size.getWidth());
+
+        let points = Array.new(4);
+
+        let points[0] = x1.toInt();
+        let points[1] = y1.toInt();
+        let points[2] = x2.toInt();
+        let points[3] = y2.toInt();
+
+        return points;
+    }
+}

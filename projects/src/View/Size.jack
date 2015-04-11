@@ -1,0 +1,33 @@
+class Size {
+    field Float width, height;
+
+    constructor Size new(Float Awidth, Float Aheight) {
+        let width = Awidth;
+        let height = Aheight;
+
+        return this;
+    }
+
+    function Size default() {
+        return Size.new(Float.default(), Float.default());
+    }
+
+    method Float getWidth() {
+        return width;
+    }
+
+    method Float getHeight() {
+        return height;
+    }
+
+    method Size copy() {
+        return Size.new(width.copy(), height.copy());
+    }
+
+    method void dispose() {
+        do width.dispose();
+        do height.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+}

@@ -1,15 +1,35 @@
 class Rect {
-    field Float width, height;
+    field Point origin;
+    field Size size;
 
-    constructor Rect new(Float Awidth, Float Aheight) {
-        let width = Awidth;
-        let height = Aheight;
+    constructor Rect new(Point Aorigin, Size Asize) {
+        let origin = Aorigin;
+        let size = Asize;
 
         return this;
     }
 
+    function Rect default() {
+        return Rect.new(Point.default(), Size.default());
+    }
+
+    method Point getOrigin() {
+        return origin;
+    }
+
+    method Size getSize() {
+        return size;
+    }
+
+    method Rect copy() {
+        return Rect.new(origin.copy(), size.copy());
+    }
+
     method void dispose() {
+        do origin.dispose();
+        do size.dispose();
         do Memory.deAlloc(this);
+
         return;
     }
 }

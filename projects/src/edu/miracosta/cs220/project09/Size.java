@@ -1,17 +1,27 @@
-public class Size {
-    private Float width;
-    private Float height;
+package edu.miracosta.cs220.project09;
 
-    public Size(Float width, Float height) {
-        this.height = height;
+class Size {
+    Float width;
+    Float height;
+
+    Size(Float width, Float height) {
         this.width = width;
-    }
+        this.height = height;
+    } 
 
-    public Float getWidth() {
+    Float getWidth() {
         return this.width;
     }
 
-    public Float getHeight() {
+    Float getHeight() {
         return this.height;
+    }
+
+    Size copy() {
+        return new Size(width, height);
+    }
+
+    public wmString toString() {
+        return String.format("(%s, %s)", width, height);
     }
 }

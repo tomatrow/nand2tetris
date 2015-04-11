@@ -1,17 +1,28 @@
-public class Rect {
-    private Point origin;
-    private Size size;
+package edu.miracosta.cs220.project09;
 
-    public Rect(Point origin, Size size) {
+class Rect {
+    Point origin;
+    Size size;
+
+    Rect(Point origin, Size size) {
         this.origin = origin;
         this.size = size;
     }
 
-    public Point getOrigin() {
+    Point getOrigin() {
         return this.origin;
     }
 
-    public Size getSize() {
+    Size getSize() {
         return this.size;
     }
+
+    Rect copy() {
+        return new Rect(origin.copy(), size.copy());
+    }
+
+    public String toString() {
+        return String.format("[%s, %s]", origin, size);
+    }
 }
+

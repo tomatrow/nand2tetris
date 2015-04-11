@@ -1,16 +1,19 @@
-public class Maths {
-    public static final Float coeffcient01 = new Float((short)9724, (short)-4);
-    public static final Float coeffcient02 = new Float((short)1920, (short)-4);
+package edu.miracosta.cs220.project09;
 
-    // Approximation of Remez approximation of arctan: [http://goo.gl/eBmL5Q]
+class Maths {
+    static final Float coeffcient01 = new Float((short)9724, (short)-4);
+    static final Float coeffcient02 = new Float((short)1920, (short)-4);
+
+    // Accurate to ~ 3 places...I know...
+    // [Approximation](http://goo.gl/eBmL5Q) of [Remez approximation](http://en.wikipedia.org/wiki/Remez_algorithm) of [atan2](http://en.wikipedia.org/wiki/Atan2): 
     // atan(z) = s - r = (0.97179803008 * z) - (0.19065470515 * z**3)
-
-    public static Float atan2(Point point) {
+    static Float atan2(Point point) {
         return atan2(point.getX(), point.getY());
     }
-    public static Float atan2(Float x, Float y) {
+
+    static Float atan2(Float x, Float y) {
         Float z = y.copy();
-        answer.div(x);
+        z.div(x);
 
         // r
         Float r = z.copy();
@@ -26,20 +29,11 @@ public class Maths {
 
         // destroy r
 
+        // Just doing things according to math. 
         if (y.getMantissa() < 0 && z.getMantissa() > 0) {
-            Float negOne = new Float((short)-1, (short)0);
-            f.mult(negOne);
-            // destroy negOne
+            z.neg();
         }
 
         return z;
-    }
-
-    public static Float sin() {
-        return null;
-    }
-
-    public static Float cos() {
-        return null;
     }
 }

@@ -1,9 +1,33 @@
 class Point {
     field Float x, y;
+    
     constructor Point new(Float Ax, Float Ay) {
         let x = Ax;
         let y = Ay;
-        
+
         return this;
+    }
+
+    function Point default() {
+        return Point.new(Float.default(), Float.default());
+    }
+
+    method Float getX() {
+        return x;
+    }
+
+    method Float getY() {
+        return y;
+    }
+
+    method Point copy() {
+        return Point.new(x.copy(), y.copy());
+    }
+
+    method void dispose() {
+        do x.dispose();
+        do y.dispose();
+        do Memory.deAlloc(this);
+        return;
     }
 }

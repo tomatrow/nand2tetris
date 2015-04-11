@@ -1,0 +1,113 @@
+class Transform {
+    /** 
+     * +-------------------------------+
+     * |  new   =   old   *  transform |
+     * |                    +--     --+|
+     * |                    | a  b  0 ||
+     * |[x y 1] = [x y 1] * | c  d  0 ||
+     * |                    | tx ty 1 ||
+     * |                    +--     --+|
+     * +-------------------------------+
+     */
+
+    field Float a,b,c,d,tx,ty;
+
+    constructor Transform new(Float A, Float B, Float C, Float D, Float TX, Float TY) {
+        let a = A;
+        let b = B;
+        let c = C;
+        let d = D;
+        let tx = TX;
+        let ty = TY ;
+
+        return this; 
+    }
+
+    function Transform default() {
+        return Transform.new(Float.new(1,0), Float.default(), Float.default(), Float.new(1,0), Float.default(), Float.default());
+    }
+
+    method void dispose() {
+        do a.dispose();
+        do b.dispose();
+        do c.dispose();
+        do d.dispose();
+        do tx.dispose();
+        do ty.dispose();
+        do Memory.deAlloc(this);
+
+        return;
+    }
+
+    method void translate(Float x, Float y) {
+        do tx.add(x);
+        do ty.add(y);
+
+        return;
+    }
+
+    method void scale(Float sx, Float sy) {
+        do a.mult(sx);
+        do b.mult(sx);
+        do c.mult(sy);
+        do d.mult(sy);
+
+        return;
+    }
+
+    method void rect(Rect rect) {
+        do point(rect.getOrigin());
+        do size(rect.getSize());
+
+        return;
+    }
+
+    method void size(Size size) {
+        var Float cBYy, bBYx, height, width;
+
+        let height = size.getHeight();
+        let width = size.getWidth();
+
+        let cBYy = height.copy();
+        do cBYy.mult(c);
+
+        let bBYx = width.copy();
+        do bBYx.mult(b);
+        
+        do height.mult(d);
+        do height.add(bBYx);
+
+        do width.mult(a);
+        do width.add(cBYy);
+
+        do cBYy.dispose();
+        do bBYx.dispose();
+
+        return;
+    }
+
+    method void point(Point point) {
+        var Float x, y, cBYy, bBYx;
+
+        let x = point.getX();
+        let y = point.getY();
+
+        let cBYy = y.copy();
+        do cBYy.mult(c);
+        let bBYx = x.copy();
+        do bBYx.mult(b);
+
+        do y.mult(d);
+        do y.add(bBYx);
+        do y.add(ty);
+
+        do x.mult(a);
+        do x.add(cBYy);
+        do x.add(tx);
+
+        do cBYy.dispose();
+        do bBYx.dispose();
+
+        return;
+    }
+}

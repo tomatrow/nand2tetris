@@ -1,0 +1,37 @@
+class View {
+    field Transform transform;
+    field Rect frame;
+    field boolean color;
+
+    constructor View new(Transform Atransform, Rect Aframe, boolean Acolor) {
+        let transform = Atransform;
+        let color = Acolor;
+        let frame = Aframe;
+
+        return this;
+    }
+
+    function View default() {
+        return View.new(Transform.default(), Rect.default(), true);
+    }
+
+    method void dispose() {
+        do transform.dispose();
+        do frame.dispose();
+        do Memory.deAlloc(this);
+
+        return;
+    }
+
+    method boolean getColor() {
+        return color;
+    }
+
+    method Rect getFrame() {
+        return frame;
+    }
+
+    method Transform getTransform() {
+        return transform;
+    }
+}
